@@ -1,0 +1,242 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Git::Git::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Git__Git-RelWithDebInfo-8cb5e0dfb8ed8a8974a9.json",
+					"name" : "Git::Git",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "Threads::Threads::@369fad943889a5ec39c8",
+					"jsonFile" : "target-Threads__Threads-RelWithDebInfo-4b4903b15f111921d673.json",
+					"name" : "Threads::Threads",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "glm-header-only::@ce54d98d7b326a3e12a8",
+					"jsonFile" : "target-glm-header-only-RelWithDebInfo-8ab8cb40f34fa9c74adf.json",
+					"name" : "glm-header-only",
+					"projectIndex" : 2
+				}
+			],
+			"directories" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						3
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-RelWithDebInfo-f040eec181a89de70dbe.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"abstractTargetIndexes" : 
+					[
+						1
+					],
+					"build" : "_deps/glfw-build",
+					"childIndexes" : 
+					[
+						2
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-_deps.glfw-build-RelWithDebInfo-00552f98f931758c0867.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "out/build/x64-Release/_deps/glfw-src",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "_deps/glfw-build/src",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-_deps.glfw-build.src-RelWithDebInfo-cdffbc1792910a06c840.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "out/build/x64-Release/_deps/glfw-src/src",
+					"targetIndexes" : 
+					[
+						1,
+						4
+					]
+				},
+				{
+					"build" : "_deps/glm-build",
+					"childIndexes" : 
+					[
+						4
+					],
+					"jsonFile" : "directory-_deps.glm-build-RelWithDebInfo-4434d77f81b7bdb5595d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "out/build/x64-Release/_deps/glm-src"
+				},
+				{
+					"abstractTargetIndexes" : 
+					[
+						2
+					],
+					"build" : "_deps/glm-build/glm",
+					"jsonFile" : "directory-_deps.glm-build.glm-RelWithDebInfo-2177da7c17aef4ed7b52.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 2,
+					"source" : "out/build/x64-Release/_deps/glm-src/glm",
+					"targetIndexes" : 
+					[
+						2
+					]
+				}
+			],
+			"name" : "RelWithDebInfo",
+			"projects" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "ProceduralNodeEditor",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"abstractTargetIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						1,
+						2
+					],
+					"name" : "GLFW",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						3,
+						4
+					]
+				},
+				{
+					"abstractTargetIndexes" : 
+					[
+						2
+					],
+					"directoryIndexes" : 
+					[
+						3,
+						4
+					],
+					"name" : "glm",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ProceduralNodeEditor::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ProceduralNodeEditor-RelWithDebInfo-3b20cec51795f7770073.json",
+					"name" : "ProceduralNodeEditor",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "glfw::@fa9f4482d3a2b070f206",
+					"jsonFile" : "target-glfw-RelWithDebInfo-2f1fd0842003e681f1c8.json",
+					"name" : "glfw",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "glm::@ce54d98d7b326a3e12a8",
+					"jsonFile" : "target-glm-RelWithDebInfo-1204867f350d347171e6.json",
+					"name" : "glm",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "uninstall::@369fad943889a5ec39c8",
+					"jsonFile" : "target-uninstall-RelWithDebInfo-c1975e912901acafd40d.json",
+					"name" : "uninstall",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "update_mappings::@fa9f4482d3a2b070f206",
+					"jsonFile" : "target-update_mappings-RelWithDebInfo-6c63633f1a5bf98f827d.json",
+					"name" : "update_mappings",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/Zephyr/Desktop/Proyectos/Otros/ProceduralMeshGenerator/out/build/x64-Release",
+		"source" : "C:/Users/Zephyr/Desktop/Proyectos/Otros/ProceduralMeshGenerator"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 10
+	}
+}

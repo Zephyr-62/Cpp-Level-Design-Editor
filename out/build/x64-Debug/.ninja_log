@@ -1,0 +1,27 @@
+# ninja log v7
+189	1076	8106898796913382	_deps/glfw-build/src/CMakeFiles/glfw.dir/win32_module.c.obj	865cfab0e5a264cb
+37	1165	8106898795399300	_deps/glfw-build/src/CMakeFiles/glfw.dir/init.c.obj	b2e1a04dccf192cf
+62	1185	8106898795647599	_deps/glfw-build/src/CMakeFiles/glfw.dir/monitor.c.obj	b10bc732658e7f5a
+112	1206	8106898796147245	_deps/glfw-build/src/CMakeFiles/glfw.dir/egl_context.c.obj	6a7e06757f79b8e1
+218	1227	8106898797199097	_deps/glfw-build/src/CMakeFiles/glfw.dir/win32_thread.c.obj	2cc182c1907a41e1
+87	1247	8106898795901299	_deps/glfw-build/src/CMakeFiles/glfw.dir/vulkan.c.obj	bbf5311d0f4a675b
+162	1254	8106898796645628	_deps/glfw-build/src/CMakeFiles/glfw.dir/null_window.c.obj	4f7a01ee597db764
+246	1259	8106898797480390	_deps/glfw-build/src/CMakeFiles/glfw.dir/win32_joystick.c.obj	cc8e9e6f7ce53fe4
+205	1265	8106898797072555	_deps/glfw-build/src/CMakeFiles/glfw.dir/win32_time.c.obj	3c8d63329c4facd9
+137	1269	8106898796388357	_deps/glfw-build/src/CMakeFiles/glfw.dir/null_init.c.obj	da156b2b0c3a9aa1
+232	1275	8106898797344447	_deps/glfw-build/src/CMakeFiles/glfw.dir/win32_init.c.obj	f25f374e9620402f
+177	1280	8106898796782186	_deps/glfw-build/src/CMakeFiles/glfw.dir/null_joystick.c.obj	5d069308d7791230
+100	1285	8106898796016467	_deps/glfw-build/src/CMakeFiles/glfw.dir/window.c.obj	f2d3f2ed29870036
+75	1361	8106898795779285	_deps/glfw-build/src/CMakeFiles/glfw.dir/platform.c.obj	741399a21336edc5
+150	1367	8106898796519517	_deps/glfw-build/src/CMakeFiles/glfw.dir/null_monitor.c.obj	2409666a9d77772a
+125	1373	8106898796274909	_deps/glfw-build/src/CMakeFiles/glfw.dir/osmesa_context.c.obj	34a79d58964af11c
+24	1380	8106898795263480	_deps/glfw-build/src/CMakeFiles/glfw.dir/context.c.obj	2d4b89b016dac706
+50	1385	8106898795523451	_deps/glfw-build/src/CMakeFiles/glfw.dir/input.c.obj	83dca1fab58aab5c
+1187	1683	8106898806900198	_deps/glfw-build/src/CMakeFiles/glfw.dir/wgl_context.c.obj	e3b40e1fd8a13a09
+1166	1703	8106898806681919	_deps/glfw-build/src/CMakeFiles/glfw.dir/win32_window.c.obj	bae054265826ae2a
+1146	1748	8106898806487225	_deps/glfw-build/src/CMakeFiles/glfw.dir/win32_monitor.c.obj	61cfd802d699e6cc
+1750	1872	8106898812524182	_deps/glfw-build/src/glfw3.lib	619ee85756a67295
+1229	2577	8106898807320647	CMakeFiles/ProceduralNodeEditor.dir/src/main.cpp.obj	8f386bf4f582c8f2
+1208	3374	8106898807104600	_deps/glm-build/glm/CMakeFiles/glm.dir/detail/glm.cpp.obj	7354a90983c46e9e
+3376	3470	8106898828787874	_deps/glm-build/glm/glm.lib	96607e0729c31cbb
+3470	4009	8106898829729370	ProceduralNodeEditor.exe	1a932365cae9d74f
