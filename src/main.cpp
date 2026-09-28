@@ -4,8 +4,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
 #include <iostream>
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 
 #include "Shader.hpp"
+#include "resources/Mesh.hpp"
+
 
 int main() {
     if (!glfwInit()) {
@@ -33,50 +38,68 @@ int main() {
         std::cerr << "Failed to initialize GLAD\n";
         return -1;
     }
-    // Triangle vertex data: 3 vertices, XYZ each
-    float const vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f,
-    };
 
-    unsigned int vao, vbo;
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    ImGui::StyleColorsDark();
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
 
-    Shader triangleShader("shaders/triangle.vert", "shaders/triangle.frag");
 
-    auto lastFrameTime = std::chrono::steady_clock::now();
-    float totalTime = 0.0f;
+    {
+        Mesh triangle("builtin:triangle",
+            {
+                { {-0.5f, -0.5f, 0.0f}, {0, 0, 1}, {0, 0} },
+                { { 0.5f, -0.5f, 0.0f}, {0, 0, 1}, {1, 0} },
+                { { 0.0f,  0.5f, 0.0f}, {0, 0, 1}, {0.5f, 1} },
+            },
+            { 0, 1, 2 });
 
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
-
-        auto const currentFrameTime = std::chrono::steady_clock::now();
-        std::chrono::duration<float> const elapsedTime = currentFrameTime - lastFrameTime;
-        lastFrameTime = currentFrameTime;
-        totalTime += elapsedTime.count();
-
-        glClearColor(0.10f, 0.10f, 0.15f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glm::mat4 model = glm::rotate(glm::mat4(1.0f), totalTime, glm::vec3(0.0f, 1.0f, 0.5f));
-
+        Shader triangleShader("builtin_resources/shaders/triangle.vert", "builtin_resources/shaders/triangle.frag");
         triangleShader.use();
-        triangleShader.setMat4("model", model);
 
-        glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        auto lastFrameTime = std::chrono::steady_clock::now();
+        float totalTime = 0.0f;
 
-        glfwSwapBuffers(window);
+        while (!glfwWindowShouldClose(window)) {
+            glfwPollEvents();
+
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            ImGui::ShowDemoWindow();
+
+            auto const currentFrameTime = std::chrono::steady_clock::now();
+            std::chrono::duration<float> const elapsedTime = currentFrameTime - lastFrameTime;
+            lastFrameTime = currentFrameTime;
+            totalTime += elapsedTime.count();
+
+            glClearColor(0.10f, 0.10f, 0.15f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            glm::mat4 model = glm::rotate(glm::mat4(1.0f), totalTime, glm::vec3(0.0f, 1.0f, 0.5f));
+
+            triangleShader.setMat4("model", model);
+		    triangle.draw();
+
+		    // Draw editor UI
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+            glfwSwapBuffers(window);
+        }
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
 
     glfwTerminate();
     return 0;
