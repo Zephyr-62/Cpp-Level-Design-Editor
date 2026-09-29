@@ -57,13 +57,12 @@ target_include_directories(imgui PUBLIC
 target_link_libraries(imgui PUBLIC glfw glad)
 target_compile_definitions(imgui PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
 
-
 # --- Executable ---
-add_executable(level_editor 
-    src/main.cpp
-    src/Shader.cpp
-    src/resources/Mesh.cpp
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_SOURCE_DIR}/src/*.cpp"
 )
+
+add_executable(level_editor ${SOURCES})
 
 add_custom_command(TARGET level_editor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

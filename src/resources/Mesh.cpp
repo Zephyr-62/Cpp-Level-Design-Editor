@@ -1,6 +1,6 @@
 #include "resources/Mesh.hpp"
 
-#include <glad/glad.h>
+#include "core/GLCommon.hpp"
 #include <cstddef>
 
 Mesh::Mesh(std::string id, std::vector<Vertex> vertices, std::vector<std::uint32_t> indices)
