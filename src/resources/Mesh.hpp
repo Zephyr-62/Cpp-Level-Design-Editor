@@ -1,3 +1,4 @@
+#pragma once
 
 #include "resources/Resource.hpp"
 
@@ -6,11 +7,10 @@
 #include <glm/glm.hpp>
 
 struct Vertex {
-	glm::vec3 position;
-	glm::vec3 normal;
-	glm::vec2 uv;
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 uv;
 };
-
 
 class Mesh : public Resource {
 public:
@@ -22,10 +22,13 @@ public:
     Mesh& operator=(const Mesh&) = delete;
     Mesh& operator=(Mesh&& other) noexcept;
 
-    void draw() const;
+	unsigned int vao() const { return m_vao; }
+	std::uint32_t indicesCount() const { return static_cast<std::uint32_t>(m_indices.size()); }
 
-    const std::vector<Vertex>& vertices() const { return m_vertices; }
-    const std::vector<std::uint32_t>& indices() const { return m_indices; }
+    
+    virtual bool drawableOnInspector() const override { return true; }
+    virtual const char* inspectorName() const override { return "Mesh"; }
+    virtual void drawInspector(EditorContext& context) override;
 
 private:
     void upload();

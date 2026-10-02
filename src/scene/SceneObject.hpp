@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-class SceneObject {
+class SceneObject : public Inspectable {
 public:
     explicit SceneObject(std::string objectName);
 
@@ -29,11 +29,15 @@ public:
         return nullptr;
     }
 
-    void drawInspector();
+	virtual const char* inspectorName() const { return name.c_str(); }
+    void drawInspector(EditorContext& context) override;
 
-    std::string name;
     Transform transform;
+    std::string name;
 
 private:
+	//SceneObject* parent = nullptr;
+	//std::vector<SceneObject*> children;
+
     std::vector<std::unique_ptr<Component>> m_components;
 };

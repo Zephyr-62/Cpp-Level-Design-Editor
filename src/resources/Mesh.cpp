@@ -2,6 +2,7 @@
 
 #include "core/GLCommon.hpp"
 #include <cstddef>
+#include <imgui.h>
 
 Mesh::Mesh(std::string id, std::vector<Vertex> vertices, std::vector<std::uint32_t> indices)
             : Resource(std::move(id))
@@ -80,9 +81,9 @@ void Mesh::release() {
     m_vao = m_vbo = m_ebo = 0;
 }
 
-void Mesh::draw() const {
-    glBindVertexArray(m_vao);
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()),
-        GL_UNSIGNED_INT, nullptr);
-}
+// ###### OnInspectorDraw ######
 
+void Mesh::drawInspector(EditorContext& context) {
+    ImGui::Text("Vertices: %zu", m_vertices.size());
+    ImGui::Text("Indices: %zu", m_indices.size());
+}

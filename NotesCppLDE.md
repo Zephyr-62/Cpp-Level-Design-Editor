@@ -4,11 +4,27 @@
 
 ### TODO
 
+- Fix windows not showing up where required
+	- Viewport, resources, 
+
+- List resources divided into categories: Mesh, Shader, Material
+
+- Merge resource inspector/scene obj inspector --> change which one is being used
+
+- SceneObject Hierarchy
+	- TransformChild calculation (& caching?)
+
+- Scene
+	- Get object (by name/id)
+	- Json serialization (define format) --> Should be handled by resource load/unload
+	- Appliaction Loading scene
+
 - Renderer
-	- First triangle
 	- Camera fixed
 	- Camera pan
-- SceneObjects Hierarchy
+
+- Resource Manager
+	- Unload resources that are not being used
 
 
 ### Main Loop
@@ -98,4 +114,82 @@
 - Save edited mesh as prefab
 - Subdivide Edge
 
+
+
+
+
+
+# Data Classes
+
+- Scene
+	- SceneObject[]
+
+- SceneObject
+	- Transform
+	- Component[]
+	
+- Component: Abstract
+	- Paint UI logic
+	- Hold pertinent data
+
+- Transform: Component
+	- Position, rotation (quat), scale
+
+- MeshRenderer: Component
+	- Mesh
+	- Material (if empty use default rendering program 'triangle.vert/frag')
+
+- Resource: Abstract
+	- Save/load logic
+
+- Mesh: Resource
+	- Vertex/Indices/UV Arrays
+	- VOA, VAB...
+
+- Material: Resource (really basic for now, no PBR)
+	- Shader
+	- Albedo
+	- Emission?
+	
+- Shader: Resource
+	
+	
+- Camera: Component
+	- FOV
+	- Near/Far planes
+	- Projection: iso/perspective
+	- (TODO: provide preview in small window)
+	- Set as main method
+	
+- Application:
+	- Globals
+	- Scene
+	- Renderer
+	- GUI/GL setup
+	- Main loop
+	
+- ResourceManager
+	- handles shared resources
+- Renderer
+	- Main Camera: near/far, fov., transform...
+	- Walks the scene tree and uses every meshRenderer component
+	
+	
+# Folder Structure
+
+/root
+	/assets        user data (scenes, custom resources)
+	/src/
+		/core        					Application, utils
+		/scene       					Scene, SceneObject, Component, Transform
+		/components  			MeshRenderer, Camera
+		/resources   				Resource, ResourceManager, Mesh, Material, Shader
+		/renderer    				Renderer
+		/editor      					panels, editor camera, selection...
+	/builtin_resources/     built-in data
+		/meshes
+			(e.g. cube, quad, sphere, 
+		/materials
+			/shaders
+	
 

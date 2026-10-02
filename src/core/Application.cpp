@@ -8,29 +8,63 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 
-// Time tracking and logging
-#include <chrono>
 #include <iostream>
+#include <memory>
+#include <filesystem>
+#include <chrono>
+#include <algorithm>
 
 // Temporary includes for testing
-#include "Shader.hpp"
+#include "resources/Shader.hpp"
+#include "resources/Material.hpp"
 #include "resources/Mesh.hpp"
 #include "components/Transform.hpp"
 #include "scene/SceneObject.hpp"
+#include "components/MeshRenderer.hpp"
 
-Application::Application() {
-	Initialize();
-}
+Application::Application() { Initialize(); }
+Application::~Application() { Shutdown(); }
 
-Application::~Application() {
-	Shutdown();
-}
+void InitializeSmallScene(Scene& scene, ResourceManager& resourceManager);
 
 void Application::LoadScene(const std::string& scenePath) {
 
 	//TODO Implement scene loading from a .scn file (JSON format)
-	m_scene = Scene(); // For now, just create a new empty scene
+	m_scene = Scene(); // For now, just create a new empty scene and populate it with some test objects
+    InitializeSmallScene(m_scene, m_resourceManager);
     return;
+}
+
+
+void InitializeSmallScene(Scene& scene, ResourceManager& resourceManager) {
+    SceneObject& sceneObj = scene.createObject("Triangle");
+
+    auto whiteShader = std::make_shared<Shader>("builtin:white",
+        std::filesystem::path::path("builtin_resources/shaders/unlit.vert").string(),
+        std::filesystem::path::path("builtin_resources/shaders/white.frag").string());
+    resourceManager.add(whiteShader);
+
+    auto unlitShader = std::make_shared<Shader>("builtin:unlit",
+        std::filesystem::path::path("builtin_resources/shaders/unlit.vert").string(),
+        std::filesystem::path::path("builtin_resources/shaders/unlit.frag").string());
+    resourceManager.add(unlitShader);
+    
+    auto defaultMat = std::make_shared<Material>("builtin:defaultMat", unlitShader);
+    resourceManager.add(defaultMat);
+
+    auto& meshRenderer = sceneObj.addComponent<MeshRenderer>();
+    meshRenderer.material = defaultMat;
+    std::vector<Vertex> vertices = {
+        Vertex{{-0.5f, -0.5f, 0.0f}, {0, 0, 1}, {0, 0} },
+        Vertex{{0.5f, -0.5f, 0.0f}, {0, 0, 1}, {1, 0} },
+        Vertex{{0.0f,  0.5f, 0.0f}, {0, 0, 1}, {0.5f, 1}},
+    };
+    std::vector<std::uint32_t> indices = { 0, 1, 2 };
+    resourceManager.add(std::make_shared<Mesh>("builtin:triangle",
+        vertices,
+        indices
+    ));
+    meshRenderer.mesh = resourceManager.get<Mesh>("builtin:triangle");
 }
 
 void Application::Run() {
@@ -40,74 +74,29 @@ void Application::Run() {
         return;
 	}
 
-    //TODO Temporary code to check structure is working
-    m_scene.createObject("Camera");
-    m_scene.createObject("Camera2");
-    SceneObject* selectedObject = nullptr;
+    LoadScene("builtin:defaultScene"); // Load default empty scene on startup.
 
-    Mesh triangle("builtin:triangle",
-        {
-            { {-0.5f, -0.5f, 0.0f}, {0, 0, 1}, {0, 0} },
-            { { 0.5f, -0.5f, 0.0f}, {0, 0, 1}, {1, 0} },
-            { { 0.0f,  0.5f, 0.0f}, {0, 0, 1}, {0.5f, 1} },
-        },
-        { 0, 1, 2 });
-
-    Shader triangleShader("builtin_resources/shaders/triangle.vert", "builtin_resources/shaders/triangle.frag");
-    triangleShader.use();
-
-    auto lastFrameTime = std::chrono::steady_clock::now();
-    float totalTime = 0.0f;
-
-    Transform transform;
 
     while (!glfwWindowShouldClose(m_window)) {
         glfwPollEvents();
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        SetupDockspace();
+		// Frame time calculation
+        float const currentFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+        m_elapsedTime = currentFrameTime - m_lastFrameTime;
+        m_lastFrameTime = currentFrameTime;
+        m_applicationTime += m_elapsedTime;
 
-        ImGui::Begin("Viewport");
-        ImGui::End();
+        //std::cout << "Last Frame Time: " << m_lastFrameTime << "ms, "
+        //          << "Application Runtime: " << m_applicationTime << "ms, "
+        //          << "Elapsed Time: " << m_elapsedTime << "ms" << "\n";
 
-        ImGui::Begin("Hierarchy", 0, ImGuiWindowFlags_NoCollapse & ImGuiWindowFlags_AlwaysAutoResize);
-        for (const auto& obj : m_scene.objects()) {
-            if (ImGui::Selectable(obj->name.c_str(), selectedObject == obj.get()))
-                selectedObject = obj.get();
-        }
-        ImGui::End();
+        // Update loop
+        // Iterate through scene objects and run their update methods for every runnable component
+        // What should be the update order?
 
-        ImGui::Begin("Inspector", 0, ImGuiWindowFlags_NoCollapse & ImGuiWindowFlags_AlwaysAutoResize);
-        if (selectedObject)
-            selectedObject->drawInspector();
-        ImGui::End();
-
-        ImGui::Begin("Triangle", 0, ImGuiWindowFlags_AlwaysAutoResize);
-        transform.drawInspector();
-        ImGui::End();
-
-        auto const currentFrameTime = std::chrono::steady_clock::now();
-        std::chrono::duration<float> const elapsedTime = currentFrameTime - lastFrameTime;
-        lastFrameTime = currentFrameTime;
-        totalTime += elapsedTime.count();
-
-        glClearColor(0.10f, 0.10f, 0.15f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-
-        glm::mat4 model = transform.localMatrix();
-        model = glm::rotate(model, totalTime, glm::vec3(0.0f, 1.0f, 0.5f));
-
-        triangleShader.setMat4("model", model);
-        triangle.draw();
-
-        // Draw editor UI
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-
+        // Rendering
+		RenderScene();
+		RenderUI();
         glfwSwapBuffers(m_window);
     }
 
@@ -178,6 +167,73 @@ void Application::Shutdown() {
     ImGui::DestroyContext();
     glfwTerminate();
 
+}
+
+void Application::RenderScene() {
+    glClearColor(0.10f, 0.10f, 0.15f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    m_renderer.Render(m_scene);  
+
+
+	// Temporary code to render a rotating triangle
+    // glm::mat4 model = transform.localMatrix();
+    // model = glm::rotate(model, m_applicationTime, glm::vec3(0.0f, 1.0f, 0.5f));
+
+    // triangleShader.setMat4("model", model);
+    // triangle.draw();
+}
+
+void Application::RenderUI() {
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    SetupDockspace();
+
+    ImGui::Begin("Viewport");
+    ImGui::End();
+
+    static SceneObject* selectedObject;
+
+    ImGui::Begin("Hierarchy", 0, ImGuiWindowFlags_NoCollapse & ImGuiWindowFlags_AlwaysAutoResize);
+    for (const auto& obj : m_scene.objects()) {
+        if (ImGui::Selectable(obj->name.c_str(), selectedObject == obj.get()))
+            selectedObject = obj.get();
+    }
+    ImGui::End();
+
+    ImGui::Begin("Inspector", 0, ImGuiWindowFlags_NoCollapse & ImGuiWindowFlags_AlwaysAutoResize);
+    if (selectedObject) {
+        selectedObject->drawInspector(m_context);
+		ImGui::Separator();
+		if (ImGui::Button("Add Component")) {
+			// TODO: Display dropdown of available components to add e.g. MeshRenderer, Camera...
+			INFO_LOG("Add Component button clicked. (Functionality not implemented yet)");
+		}
+    }
+    ImGui::End();
+
+    static Resource* selectedResource = nullptr;
+
+    ImGui::Begin("Resources");
+    for (const auto& [id, resource] : m_resourceManager.getAll()) {
+        if (ImGui::Selectable(id.c_str(), selectedResource == resource.get())) {
+            selectedResource = resource.get();
+        }
+    }
+    ImGui::End();
+
+    ImGui::Begin("Resource Inspector");
+    if (selectedResource) {
+        ImGui::Text("%s", selectedResource->inspectorName());
+        ImGui::Separator();
+        selectedResource->drawInspector(m_context);
+    }
+    ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Application::SetupDockspace() {
