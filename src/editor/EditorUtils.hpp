@@ -19,7 +19,7 @@ public:
     /// @param resource a reference to the shared pointer of the resource to be modified
     /// @return true if the resource was changed, false otherwise
     template <typename T>
-    static bool DrawResourcePicker(EditorContext& context, const std::string& label, std::shared_ptr<T>& resource)
+    static bool DrawResourcePicker(ApplicationContext& context, const std::string& label, std::shared_ptr<T>& resource)
     {
         std::string popupId = "Select " + label;
         bool resourceChanged = false;
@@ -64,5 +64,11 @@ public:
         }
 
         return resourceChanged;
+    }
+
+    static void DrawHeader(const char* text){
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.3f, 1.0f));
+        ImGui::Text(text);
+        ImGui::PopStyleColor();
     }
 };

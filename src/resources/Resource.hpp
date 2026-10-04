@@ -5,7 +5,7 @@
 #include <string>
 #include <utility>
 
-class Resource : Inspectable {
+class Resource : public Inspectable {
 public:
     explicit Resource(std::string id) : m_id(std::move(id)) {}
     virtual ~Resource() = default;
@@ -18,7 +18,7 @@ public:
     const std::string& id() const { return m_id; }
 
     virtual const char* inspectorName() const override { return ""; }
-    virtual void drawInspector(EditorContext& context) override { return; }
+    virtual void drawInspector(ApplicationContext& context) override { return; }
     virtual bool drawableOnInspector() const { return false; }
 
 private:

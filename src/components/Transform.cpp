@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-void Transform::drawInspector(EditorContext& context) {
+void Transform::drawInspector(ApplicationContext& context) {
     ImGui::DragFloat3("Position", &position.x, 0.05f);
 
     glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));

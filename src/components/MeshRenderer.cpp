@@ -5,7 +5,7 @@
 #include <imgui.h>
 
 
-void MeshRenderer::drawInspector(EditorContext& context) {
+void MeshRenderer::drawInspector(ApplicationContext& context) {
     EditorUtils::DrawResourcePicker<Mesh>(context, "Mesh", mesh);
     EditorUtils::DrawResourcePicker<Material>(context, "Material", material);
 }

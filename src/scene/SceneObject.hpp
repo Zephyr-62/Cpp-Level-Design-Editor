@@ -30,7 +30,7 @@ public:
     }
 
 	virtual const char* inspectorName() const { return name.c_str(); }
-    void drawInspector(EditorContext& context) override;
+    void drawInspector(ApplicationContext& context) override;
 
     Transform transform;
     std::string name;

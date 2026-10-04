@@ -15,5 +15,5 @@ public:
 	glm::mat4 localMatrix() const;
 
 	const char* inspectorName() const override { return "Transform"; }
-	void drawInspector(EditorContext& context) override;
+	void drawInspector(ApplicationContext& context) override;
 };

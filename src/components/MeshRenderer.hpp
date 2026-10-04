@@ -13,5 +13,5 @@ public:
 	std::shared_ptr<Material> material;
 
 	const char* inspectorName() const override { return "Mesh Renderer"; }
-	void drawInspector(EditorContext& context) override;
+	void drawInspector(ApplicationContext& context) override;
 };

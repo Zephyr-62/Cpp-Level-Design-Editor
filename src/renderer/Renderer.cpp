@@ -13,7 +13,16 @@
 
 #include <glad/glad.h>
 
-void Renderer::Render(const Scene& scene, const EditorContext& context) const {
+
+
+void Renderer::Render(const Scene& scene, const ApplicationContext& context) const {
+
+	// TODO render to texture, change texture size to editor.viewportSize
+	// glGenFramebuffers(1, &m_fbo);
+	// glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	glViewport(0, 0, 1280, 720);
+	glClearColor(0.10f, 0.10f, 0.15f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);	
 
 	auto& camera = context.camera;
 	glm::mat4 viewProjectionMatrix = camera.projectionMatrix(context.viewportAspectRatio) * camera.viewMatrix();
@@ -35,6 +44,8 @@ void Renderer::Render(const Scene& scene, const EditorContext& context) const {
 			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(meshRenderer->mesh->indicesCount()), GL_UNSIGNED_INT, nullptr);
 		}
 	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::applyMaterialProperties(const std::shared_ptr<Material>& material) const {

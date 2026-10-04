@@ -28,7 +28,7 @@ public:
     
     virtual bool drawableOnInspector() const override { return true; }
     virtual const char* inspectorName() const override { return "Mesh"; }
-    virtual void drawInspector(EditorContext& context) override;
+    virtual void drawInspector(ApplicationContext& context) override;
 
 private:
     void upload();

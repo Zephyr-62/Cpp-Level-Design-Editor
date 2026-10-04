@@ -39,7 +39,7 @@ MaterialPropertyValue Material::getPropertyValue(const std::string& propertyName
     }
 }
 
-void Material::drawInspector(EditorContext& context) {
+void Material::drawInspector(ApplicationContext& context) {
 
     // TODO beautify property names for inspector rendering!! (editor/EditorUtils.hpp)
     for (auto& [propertyName, value] : m_properties) {

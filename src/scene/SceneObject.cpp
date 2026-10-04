@@ -5,7 +5,7 @@
 SceneObject::SceneObject(std::string objectName)
     : name(std::move(objectName)) {}
 
-void SceneObject::drawInspector(EditorContext& context) {
+void SceneObject::drawInspector(ApplicationContext& context) {
     ImGui::Text("%s", name.c_str());
     ImGui::Separator();
 

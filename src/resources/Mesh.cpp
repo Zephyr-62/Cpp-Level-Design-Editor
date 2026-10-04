@@ -83,7 +83,7 @@ void Mesh::release() {
 
 // ###### OnInspectorDraw ######
 
-void Mesh::drawInspector(EditorContext& context) {
+void Mesh::drawInspector(ApplicationContext& context) {
     ImGui::Text("Vertices: %zu", m_vertices.size());
     ImGui::Text("Indices: %zu", m_indices.size());
 }
