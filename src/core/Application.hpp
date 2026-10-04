@@ -5,6 +5,7 @@
 #include "core/WindowCommon.hpp"
 #include "core/Constants.hpp"
 #include "editor/EditorContext.hpp"
+#include "editor/EditorCamera.hpp"
 #include "resources/ResourceManager.hpp"
 #include "renderer/Renderer.hpp"
 #include "scene/Scene.hpp"
@@ -46,10 +47,11 @@ private:
 
 	GLFWwindow* m_window;
 	Scene m_scene;
+	EditorCamera m_camera;
 	ResourceManager m_resourceManager;
 	Renderer m_renderer;
 
-	EditorContext m_context{ m_resourceManager };
+	EditorContext m_context{ m_resourceManager, m_camera, 1.0f };
 
 	float m_applicationTime = 0.0f;		// Total time since application started, in ms
 	float m_lastFrameTime = 0.0f;		// Time at which the last frame was rendered, in ms

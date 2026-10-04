@@ -173,7 +173,7 @@ void Application::RenderScene() {
     glClearColor(0.10f, 0.10f, 0.15f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    m_renderer.Render(m_scene);  
+    m_renderer.Render(m_scene, m_context);  
 
 
 	// Temporary code to render a rotating triangle

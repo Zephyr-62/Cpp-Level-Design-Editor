@@ -2,29 +2,53 @@
 # Level Design Engine Tool
 
 
+### Done
+
 ### TODO
 
-- Fix windows not showing up where required
-	- Viewport, resources, 
+- Paint scene to FBO
+	- Then paste it into Viewport
+	- Change FBO size based on viewport
+	- Add this logic to a new Window class or somewhere it should belong better than Application?
 
-- List resources divided into categories: Mesh, Shader, Material
-
-- Merge resource inspector/scene obj inspector --> change which one is being used
-
-- SceneObject Hierarchy
-	- TransformChild calculation (& caching?)
-
-- Scene
-	- Get object (by name/id)
-	- Json serialization (define format) --> Should be handled by resource load/unload
-	- Appliaction Loading scene
+- Editor changes:
+	- Fix windows not showing up where required
+		- Viewport, resources, 
+	- List resources divided into categories: Mesh, Shader, Material
+	- Merge resource inspector/scene obj inspector --> change which one is being used
+	- Paint actual scene into viewport window
 
 - Renderer
 	- Camera fixed
-	- Camera pan
+	- Camera panoramic/isometric
+	- Add camera settings menu into viewport
 
-- Resource Manager
-	- Unload resources that are not being used
+- Editor utilities
+	- Add Component
+	- Add scene obejct
+	- Rename scene object
+	- Duplicate scene object
+	- Delete scene object
+
+- Camera SceneObject
+	- Select to drive as main editor camera, then switch back
+	
+- Scene Hierarchy:
+	- TransformChild calculation (& caching?)
+
+- Serialization of Resources:
+	- Mesh, material, 
+	- Scene
+		- Get object (by name/id)
+		- Json serialization (define format) --> Should be handled by resource load/unload
+		- Appliaction Loading scene
+	- Resource Manager
+		- Unload resources that are not being used
+
+- Rendering:
+	- Lights SceneObjects (point, directional)
+		- Shadows
+	- Textures
 
 
 ### Main Loop

@@ -14,7 +14,6 @@ void SceneObject::drawInspector(EditorContext& context) {
     }
 
     for (auto& component : m_components) {
-        ImGui::Separator();
         ImGui::PushID(component.get());
         if (ImGui::CollapsingHeader(component->inspectorName(), ImGuiTreeNodeFlags_DefaultOpen)) {
             component->drawInspector(context);

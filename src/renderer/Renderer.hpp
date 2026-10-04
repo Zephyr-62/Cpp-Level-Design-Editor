@@ -11,7 +11,7 @@ class Shader;
 class Renderer {
 
 public:
-	void Render(const Scene& scene) const;
+	void Render(const Scene& scene, const EditorContext& context) const;
 
 private:
 	void applyMaterialProperties(const std::shared_ptr<Material>& material) const;

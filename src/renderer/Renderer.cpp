@@ -4,6 +4,8 @@
 #include "scene/SceneObject.hpp"
 #include "components/MeshRenderer.hpp"
 #include "core/Constants.hpp"
+#include "editor/EditorContext.hpp"
+#include "editor/EditorCamera.hpp"
 
 #include "resources/Mesh.hpp"
 #include "resources/Material.hpp"
@@ -11,7 +13,10 @@
 
 #include <glad/glad.h>
 
-void Renderer::Render(const Scene& scene) const {
+void Renderer::Render(const Scene& scene, const EditorContext& context) const {
+
+	auto& camera = context.camera;
+	glm::mat4 viewProjectionMatrix = camera.projectionMatrix(context.viewportAspectRatio) * camera.viewMatrix();
 
 	// Traverse scene and render each object with a MeshRenderer component
 	for (auto& obj : scene.objects()) {
@@ -23,7 +28,7 @@ void Renderer::Render(const Scene& scene) const {
 
 			auto shader = meshRenderer->material->getShader();
 			shader->use();
-			shader->setMat4("engine_model", obj.get()->transform.localMatrix());
+			shader->setMat4("engine_mvp_mat", viewProjectionMatrix * obj.get()->transform.localMatrix());
 			applyMaterialProperties(meshRenderer->material); // Use shader and set material properties into uniforms
 			
 			glBindVertexArray(meshRenderer->mesh->vao());
