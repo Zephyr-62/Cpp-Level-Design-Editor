@@ -1,6 +1,6 @@
 #pragma once
 
-#include "editor/EditorContext.hpp"
+#include "core/ApplicationContext.hpp"
 #include "resources/Resource.hpp"
 #include "resources/ResourceManager.hpp"
 
@@ -8,7 +8,12 @@
 #include <string>
 #include <memory>
 
-
+struct TextColor {
+    float r = 1.0f;
+    float g = 1.0f;
+    float b = 1.0f;
+    float a = 1.0f;
+};
 
 class EditorUtils {
 public:
@@ -66,9 +71,15 @@ public:
         return resourceChanged;
     }
 
-    static void DrawHeader(const char* text){
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.3f, 1.0f));
+    static void Text(const char* text, float fontScale=1.0, TextColor color = {1.0f, 1.0f, 1.0f, 1.0f}){
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(color.r, color.g, color.b, color.a));
+        ImGui::SetWindowFontScale(fontScale);
         ImGui::Text(text);
+        ImGui::SetWindowFontScale(1.0f);
         ImGui::PopStyleColor();
+    }
+
+    static void DrawHeader(const char* text){
+        Text(text, 1.3f, {1.0f, 0.8f, 0.3f, 1.0f});
     }
 };

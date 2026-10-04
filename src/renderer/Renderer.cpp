@@ -4,7 +4,7 @@
 #include "scene/SceneObject.hpp"
 #include "components/MeshRenderer.hpp"
 #include "core/Constants.hpp"
-#include "editor/EditorContext.hpp"
+#include "core/ApplicationContext.hpp"
 #include "editor/EditorCamera.hpp"
 
 #include "resources/Mesh.hpp"

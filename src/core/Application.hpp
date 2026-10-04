@@ -9,7 +9,7 @@
 #include "scene/Scene.hpp"
 #include "core/Constants.hpp"
 
-#include "editor/EditorContext.hpp"
+#include "core/ApplicationContext.hpp"
 #include "editor/EditorCamera.hpp"
 
 class Application {

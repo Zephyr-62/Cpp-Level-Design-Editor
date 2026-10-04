@@ -1,6 +1,6 @@
 #pragma once
 
-#include "editor/EditorContext.hpp"
+#include "core/ApplicationContext.hpp"
 
 class Inspectable{
 
