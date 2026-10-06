@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 class ResourceManager {
 public:
@@ -16,9 +17,10 @@ public:
     }
 
     void add(std::shared_ptr<Resource> resource) {
+        m_resourceTypes.insert(resource.get()->inspectorName());
         m_resources[resource->id()] = std::move(resource);
     }
-
+    
     const std::unordered_map<std::string, std::shared_ptr<Resource>>& getAll() const { return m_resources; }
 
     template <typename T>
@@ -42,6 +44,9 @@ public:
         return false;
     }
 
+    const std::unordered_set<std::string> getResourceTypes() const { return m_resourceTypes; }
+
 private:
     std::unordered_map<std::string, std::shared_ptr<Resource>> m_resources;
+    std::unordered_set<std::string> m_resourceTypes;
 };

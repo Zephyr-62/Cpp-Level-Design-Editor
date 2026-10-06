@@ -6,7 +6,6 @@
 #include "resources/ResourceManager.hpp"
 #include "core/Constants.hpp"
 
-#include <imgui.h>
 #include <imgui_internal.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -38,13 +37,16 @@ void Editor::beginFrame(){
     ImGui::NewFrame();
 }
 
-void Editor::draw(Scene& scene, ApplicationContext& context){
+void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorTexture){
     setupDockspace();
 
     // Draw all the editor panels
     // Hierarchy, Inspector, Viewport, Resources...
 
+    // Viewport Panel
     ImGui::Begin("Viewport");
+    m_viewportSize = ImGui::GetContentRegionAvail();
+    ImGui::Image((ImTextureID)(intptr_t)colorTexture, m_viewportSize, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 
     // SceneObject Hierarchy Panel
@@ -57,14 +59,21 @@ void Editor::draw(Scene& scene, ApplicationContext& context){
 
     // Resources Panel
     ImGui::Begin("Resources", 0, ImGuiWindowFlags_NoCollapse & ImGuiWindowFlags_AlwaysAutoResize);
-    for (const auto& resource : context.resourceManager.getAll<Resource>()) {
-        if (ImGui::Selectable(resource->id().c_str(), m_selectedInspectable == resource.get())) {
-            m_selectedInspectable = resource.get();
+    for(const auto& resourceType: context.resourceManager.getResourceTypes()){
+        if (ImGui::CollapsingHeader(resourceType.c_str(), ImGuiTreeNodeFlags_Framed)) {
+            for (const auto& resource : context.resourceManager.getAll<Resource>()) {
+                if(std::string(resource.get()->inspectorName()) == std::string(resourceType)){
+                    if (ImGui::Selectable(resource->id().c_str(), m_selectedInspectable == resource.get())) {
+                        m_selectedInspectable = resource.get();
+                    }
+                }
+            }
         }
     }
     ImGui::End();
 
 
+    // Inspector Panel
     ImGui::Begin("Inspector", 0, ImGuiWindowFlags_NoCollapse & ImGuiWindowFlags_AlwaysAutoResize);
     if (m_selectedInspectable) {
 
@@ -82,7 +91,7 @@ void Editor::draw(Scene& scene, ApplicationContext& context){
         // Resource Inspector
         } else {
             EditorUtils::DrawHeader("Resource");
-            ImGui::Text("%s", m_selectedInspectable->inspectorName());
+            EditorUtils::DrawInspectableName(m_selectedInspectable->inspectorName());
             ImGui::Separator();
             m_selectedInspectable->drawInspector(context);
         }
@@ -138,7 +147,7 @@ void Editor::setupDockspace(){
 
         ImGui::DockBuilderDockWindow("Hierarchy", leftId);
         ImGui::DockBuilderDockWindow("Resources", leftBottomId);
-        ImGui::DockBuilderDockWindow("Viewport", rightId);
+        ImGui::DockBuilderDockWindow("Viewport", dockspaceId);
         ImGui::DockBuilderDockWindow("Inspector", rightId);
 
         ImGui::DockBuilderFinish(dockspaceId);

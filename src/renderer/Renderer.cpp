@@ -13,19 +13,18 @@
 
 #include <glad/glad.h>
 
+void Renderer::Render(const Scene& scene, const ApplicationContext& context, int width, int height) {
 
+	m_framebuffer.resize(width, height);
+	m_framebuffer.bind();
 
-void Renderer::Render(const Scene& scene, const ApplicationContext& context) const {
-
-	// TODO render to texture, change texture size to editor.viewportSize
-	// glGenFramebuffers(1, &m_fbo);
-	// glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-	glViewport(0, 0, 1280, 720);
-	glClearColor(0.10f, 0.10f, 0.15f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);	
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.10f, 0.10f, 0.15f, 1.0f);	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	auto& camera = context.camera;
-	glm::mat4 viewProjectionMatrix = camera.projectionMatrix(context.viewportAspectRatio) * camera.viewMatrix();
+	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+	glm::mat4 viewProjectionMatrix = camera.projectionMatrix(aspectRatio) * camera.viewMatrix();
 
 	// Traverse scene and render each object with a MeshRenderer component
 	for (auto& obj : scene.objects()) {
@@ -45,7 +44,7 @@ void Renderer::Render(const Scene& scene, const ApplicationContext& context) con
 		}
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	m_framebuffer.unbind();
 }
 
 void Renderer::applyMaterialProperties(const std::shared_ptr<Material>& material) const {

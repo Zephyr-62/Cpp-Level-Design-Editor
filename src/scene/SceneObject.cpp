@@ -1,4 +1,5 @@
 #include "scene/SceneObject.hpp"
+#include "editor/EditorUtils.hpp"
 
 #include <imgui.h>
 
@@ -6,7 +7,7 @@ SceneObject::SceneObject(std::string objectName)
     : name(std::move(objectName)) {}
 
 void SceneObject::drawInspector(ApplicationContext& context) {
-    ImGui::Text("%s", name.c_str());
+    EditorUtils::DrawInspectableName(name.c_str());
     ImGui::Separator();
 
     if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {

@@ -54,9 +54,9 @@ void InitializeSmallScene(Scene& scene, ResourceManager& resourceManager) {
     auto& meshRenderer = sceneObj.addComponent<MeshRenderer>();
     meshRenderer.material = defaultMat;
     std::vector<Vertex> vertices = {
-        Vertex{{-0.5f, -0.5f, 0.0f}, {0, 0, 1}, {0, 0} },
-        Vertex{{0.5f, -0.5f, 0.0f}, {0, 0, 1}, {1, 0} },
-        Vertex{{0.0f,  0.5f, 0.0f}, {0, 0, 1}, {0.5f, 1}},
+        Vertex{{-0.433f, -0.25f, 0.0f}, {0, 0, 1}, {0, 0}},
+        Vertex{{0.433f, -0.25f, 0.0f},  {0, 0, 1}, {1, 0}},
+        Vertex{{0.0f,  0.5f, 0.0f},     {0, 0, 1}, {0.5f, 1}},
     };
     std::vector<std::uint32_t> indices = { 0, 1, 2 };
     resourceManager.add(std::make_shared<Mesh>("builtin:triangle",
@@ -64,6 +64,18 @@ void InitializeSmallScene(Scene& scene, ResourceManager& resourceManager) {
         indices
     ));
     meshRenderer.mesh = resourceManager.get<Mesh>("builtin:triangle");
+
+    vertices = {
+        Vertex{{-0.5f, -0.5f, 0}, {0, 0, 1}, {0, 0} },
+        Vertex{{-0.5f,  0.5f, 0}, {0, 0, 1}, {0, 1} },
+        Vertex{{ 0.5f,  0.5f, 0}, {0, 0, 1}, {1, 1}},
+        Vertex{{ 0.5f, -0.5f, 0}, {0, 0, 1}, {1, 0}},
+    };
+    indices = { 0, 1, 2, 2, 3, 0 };
+    resourceManager.add(std::make_shared<Mesh>("builtin:quad",
+        vertices,
+        indices
+    ));
 }
 
 void Application::Run() {
@@ -80,13 +92,15 @@ void Application::Run() {
         m_applicationTime += m_elapsedTime;
 
         // Update loop
-        // Iterate through scene objects and run their update methods for every runnable component
+        // Iterate through scene objects and run their update methods for every 'Runnable' component
         // What should be the update order?
 
         // Render loop
         m_editor.beginFrame();
-        m_renderer.Render(m_scene, m_context);
-        m_editor.draw(m_scene, m_context);
+        auto viewportSize = m_editor.viewportPanelSize();
+        m_renderer.Render(m_scene, m_context, viewportSize.x, viewportSize.y);
+        auto colorBuffer = m_renderer.getColorBuffer();
+        m_editor.draw(m_scene, m_context, colorBuffer);
         m_editor.endFrame();
 
         m_window.swapBuffers();

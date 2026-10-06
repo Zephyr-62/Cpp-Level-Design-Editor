@@ -1,26 +1,19 @@
 
 # Level Design Engine Tool
 
-
 ### Done
-
-### TODO
 
 - Paint scene to FBO
 	- Then paste it into Viewport
-	- Change FBO size based on viewport
-	- Add this logic to a new Window class or somewhere it should belong better than Application?
+	- Change FBO size & aspect ratio based on viewport
+- Editor UI: List resources divided into type categories: Mesh, Shader, Material...
 
-- Editor changes:
-	- Fix windows not showing up where required
-		- Viewport, resources, 
-	- List resources divided into categories: Mesh, Shader, Material
-	- Merge resource inspector/scene obj inspector --> change which one is being used
-	- Paint actual scene into viewport window
+### TODO
 
 - Renderer
-	- Camera fixed
-	- Camera panoramic/isometric
+	- Camera flight controls
+	- Camera orbit controls
+	- Camera isometric
 	- Add camera settings menu into viewport
 
 - Editor utilities
@@ -45,11 +38,16 @@
 	- Resource Manager
 		- Unload resources that are not being used
 
+- Add gizmos controls
+
 - Rendering:
 	- Lights SceneObjects (point, directional)
 		- Shadows
 	- Textures
 
+- Resources inspectors:
+	- Mesh: render in small view with default plain shader
+	- Material: render in quad
 
 ### Main Loop
 

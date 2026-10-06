@@ -37,7 +37,7 @@ private:
 	ResourceManager m_resourceManager;
 	Scene m_scene;
 
-	ApplicationContext m_context{ m_resourceManager, m_camera, m_window, 1.0f };
+	ApplicationContext m_context{ m_resourceManager, m_camera, m_window };
 
 	float m_applicationTime = 0.0f;		// Total time since application started, in ms
 	float m_lastFrameTime = 0.0f;		// Time at which the last frame was rendered, in ms
