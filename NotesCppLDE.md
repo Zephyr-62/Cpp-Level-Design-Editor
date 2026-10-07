@@ -3,24 +3,16 @@
 
 ### Done
 
-- Camera flight controls
-- Camera panning
-- Camera orbit controls
-- Camera zoom
-- Add camera settings menu into viewport
-
 
 ### TODO
-
-- Camera
-	- Camera isometric
-
 - Editor utilities
 	- Add Component
 	- Add scene obejct
 	- Rename scene object
 	- Duplicate scene object
 	- Delete scene object
+	- Scene grid rendering
+	- Add gizmos controls (screen to scene ray projection) 
 
 - Camera SceneObject
 	- Select to drive as main editor camera, then switch back
@@ -37,16 +29,20 @@
 	- Resource Manager
 		- Unload resources that are not being used
 
-- Add gizmos controls
+- Performance: Frustum + backface culling
+
+- Resources inspectors:
+	- Mesh: render in small view with default plain shader
+	- Material: render in quad
 
 - Rendering:
 	- Lights SceneObjects (point, directional)
 		- Shadows
 	- Textures
 
-- Resources inspectors:
-	- Mesh: render in small view with default plain shader
-	- Material: render in quad
+- mesh editing? extrude faces, add edges...
+- procedural mesh generation!!
+	- grow from base mesh?
 
 ### Main Loop
 
