@@ -3,18 +3,17 @@
 
 ### Done
 
-- Paint scene to FBO
-	- Then paste it into Viewport
-	- Change FBO size & aspect ratio based on viewport
-- Editor UI: List resources divided into type categories: Mesh, Shader, Material...
+- Camera flight controls
+- Camera panning
+- Camera orbit controls
+- Camera zoom
+- Add camera settings menu into viewport
+
 
 ### TODO
 
-- Renderer
-	- Camera flight controls
-	- Camera orbit controls
+- Camera
 	- Camera isometric
-	- Add camera settings menu into viewport
 
 - Editor utilities
 	- Add Component
@@ -25,7 +24,7 @@
 
 - Camera SceneObject
 	- Select to drive as main editor camera, then switch back
-	
+
 - Scene Hierarchy:
 	- TransformChild calculation (& caching?)
 

@@ -21,11 +21,15 @@ public:
     void endFrame();
 
     ImVec2 viewportPanelSize() const { return m_viewportSize; }
+    bool isViewportFocused() const { return m_viewportFocused; }
+
+    Inspectable* getSelectedSceneObject() const;
 
 private:
     void setupDockspace();
 
     ImVec2 m_viewportSize;
     Inspectable* m_selectedInspectable = nullptr;
-
+    bool m_viewportFocused = false;
+    bool m_showViewportStats = true;
 };

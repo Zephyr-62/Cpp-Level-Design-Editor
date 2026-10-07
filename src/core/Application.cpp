@@ -82,16 +82,34 @@ void Application::Run() {
 
     LoadScene("builtin:defaultScene"); // Load default empty scene on startup.
 
+    m_window.registerScrollCallback([this](double x, double y) { 
+        m_camera.processMouseScroll(x, y);
+    });
+
     while (!m_window.shouldClose()) {
         m_window.pollEvents();
 
 		// Frame time calculation
-        float const currentFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+        auto const now = std::chrono::steady_clock::now();
+        double const currentFrameTime = std::chrono::duration<double, std::milli>(now.time_since_epoch()).count();
+
         m_elapsedTime = currentFrameTime - m_lastFrameTime;
         m_lastFrameTime = currentFrameTime;
         m_applicationTime += m_elapsedTime;
 
-        // Update loop
+        // Editor loop
+        if(m_camera.consumeRequestedFocus()){        
+            if(auto inspectable = m_editor.getSelectedSceneObject())
+            {
+                SceneObject* sceneObj = dynamic_cast<SceneObject*>(inspectable);
+                m_camera.focusPosition(sceneObj->transform.position);                
+            }        
+        }
+        m_camera.update(m_window, m_elapsedTime/1000.0, m_editor.isViewportFocused());
+
+
+
+        // Scene Update loop
         // Iterate through scene objects and run their update methods for every 'Runnable' component
         // What should be the update order?
 

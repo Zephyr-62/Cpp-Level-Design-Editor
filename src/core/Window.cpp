@@ -25,6 +25,9 @@ Window::Window(int width, int height, const char* title){
         ERROR_LOG("Failed to initialize GLAD.", ERROR_CODE_GLAD_INIT_FAILED);
         return;
     }
+
+    glfwSetWindowUserPointer(m_window, this);
+    glfwSetScrollCallback(m_window, StaticScrollCallback);
 }
 
 Window::~Window(){
@@ -41,4 +44,39 @@ void Window::pollEvents(){
 
 void Window::swapBuffers(){
     glfwSwapBuffers(m_window);
+}
+
+bool Window::isKeyDown(int key) const {
+    return glfwGetKey(m_window, key) == GLFW_PRESS;
+}
+
+bool Window::isMouseButtonDown(int button) const {
+    return glfwGetMouseButton(m_window, button) == GLFW_PRESS;
+}
+
+glm::vec2 Window::cursorPosition() const {
+    double x, y;
+    glfwGetCursorPos(m_window, &x, &y);
+    return { static_cast<float>(x), static_cast<float>(y) };
+}
+
+void Window::setCursorMode(int mode) const {
+    glfwSetInputMode(m_window, GLFW_CURSOR, mode);
+}
+
+
+void Window::invokeScrollCallbacks(double xoffset, double yoffset) {
+    for (const auto& callback : m_scrollCallbacks) {
+        callback(xoffset, yoffset);
+    }
+}
+
+
+void Window::StaticScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    // Retrieve our C++ instance pointer from the GLFW window
+    auto* self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    if (self) {
+        self->invokeScrollCallbacks(xoffset, yoffset);
+    }
 }

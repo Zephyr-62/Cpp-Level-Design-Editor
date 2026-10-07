@@ -3,6 +3,7 @@
 
 #include "core/Window.hpp"
 #include "scene/Scene.hpp"
+#include "editor/EditorCamera.hpp"
 #include "resources/ResourceManager.hpp"
 #include "core/Constants.hpp"
 
@@ -44,9 +45,56 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
     // Hierarchy, Inspector, Viewport, Resources...
 
     // Viewport Panel
-    ImGui::Begin("Viewport");
+    ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_MenuBar);
+    ImVec2 viewportCursorPos = ImGui::GetCursorPos();
+    m_viewportFocused = ImGui::IsWindowHovered();
     m_viewportSize = ImGui::GetContentRegionAvail();
     ImGui::Image((ImTextureID)(intptr_t)colorTexture, m_viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+    
+    // Viewport Overlay
+    if(m_showViewportStats){
+        float overlayWidth = ImGui::GetContentRegionAvail().x * 0.20f;
+        ImGui::SetCursorPos(ImVec2(viewportCursorPos.x, viewportCursorPos.y));
+        ImGui::PushItemWidth(overlayWidth);
+
+        {
+            ImGui::LabelText("Zoom Level", "%.2f", context.camera.getArcBallDist());
+        }
+
+        ImGui::PopItemWidth();
+    }
+
+    // Viewport Settigns Menu
+    if(ImGui::BeginMenuBar()){
+        if(ImGui::BeginMenu("Viewport Overlay")){
+            ImGui::Checkbox("Display Stats", &m_showViewportStats);
+            ImGui::EndMenu();
+        }
+        if(ImGui::BeginMenu("Camera Settings")){
+            ImGui::SliderFloat("Field Of View", &context.camera.fov, 22.5f, 120.0f);
+            ImGui::InputFloat("Near Plane", &context.camera.nearPlane);
+            ImGui::InputFloat("Far Plane", &context.camera.farPlane);
+            
+            static const char* filterNames[] = {
+                "Perspective",
+                "Isometric"
+            };
+            int currentCameraMode = static_cast<int>(context.camera.perspectiveMode);
+            if(ImGui::Combo("Perspective/Isometric", &currentCameraMode, filterNames, IM_ARRAYSIZE(filterNames))){
+                context.camera.perspectiveMode = static_cast<EditorCamera::CameraMode>(currentCameraMode);
+            }            
+
+            ImGui::Separator();
+
+            ImGui::SliderFloat("Camera Speed", &context.camera.moveSpeed, 0, 50);
+            ImGui::SliderFloat("Mouse Sensitivity", &context.camera.mouseSensitivity, 0.01f, 0.75f);
+            ImGui::SliderFloat("Zoom Speed", &context.camera.zoomSpeed, 0, 5);
+            ImGui::InputFloat("Zoom Level", &context.camera.getArcBallDist());
+
+            ImGui::EndMenu();
+        }    
+        ImGui::EndMenuBar();
+    }
     ImGui::End();
 
     // SceneObject Hierarchy Panel
@@ -154,4 +202,14 @@ void Editor::setupDockspace(){
     }
 
     ImGui::End();
+}
+
+
+Inspectable* Editor::getSelectedSceneObject() const{
+    if(m_selectedInspectable){
+        if(dynamic_cast<SceneObject*>(m_selectedInspectable))
+            return m_selectedInspectable;
+    }
+
+    return nullptr;
 }
