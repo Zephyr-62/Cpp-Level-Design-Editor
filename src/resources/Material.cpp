@@ -11,18 +11,20 @@ Material::Material(std::string id, std::shared_ptr<Shader> shader) : Resource(st
 void Material::syncShaderProperties(){
     std::unordered_map<std::string, MaterialPropertyValue> newProperties;
     
-    for (const auto& uniform : m_shader->retrieveUniforms()) {
-        if (m_properties.contains(uniform.name)){
-            newProperties[uniform.name] = m_properties[uniform.name];
-            continue; // Preserve already existing values in the property bag, while skipping properties not present in the new shader
-        }
-
-        switch (uniform.type) {
-            case UniformType::Float: newProperties[uniform.name] = 0.0f; break;
-            case UniformType::Vec2: newProperties[uniform.name] = glm::vec2(0.0f, 0.0f); break;
-            case UniformType::Vec3: newProperties[uniform.name] = glm::vec3(0.0f, 0.0f, 0.0f); break;
-            case UniformType::Vec4: newProperties[uniform.name] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); break;
-            default: break; // Ignore unsupported types for now.
+    if(m_shader){
+        for (const auto& uniform : m_shader->retrieveUniforms()) {
+            if (m_properties.contains(uniform.name)){
+                newProperties[uniform.name] = m_properties[uniform.name];
+                continue; // Preserve already existing values in the property bag, while skipping properties not present in the new shader
+            }
+            
+            switch (uniform.type) {
+                case UniformType::Float: newProperties[uniform.name] = 0.0f; break;
+                case UniformType::Vec2: newProperties[uniform.name] = glm::vec2(0.0f, 0.0f); break;
+                case UniformType::Vec3: newProperties[uniform.name] = glm::vec3(0.0f, 0.0f, 0.0f); break;
+                case UniformType::Vec4: newProperties[uniform.name] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); break;
+                default: break; // Ignore unsupported types for now.
+            }
         }
     }
     m_properties = newProperties;
@@ -40,6 +42,9 @@ MaterialPropertyValue Material::getPropertyValue(const std::string& propertyName
 }
 
 void Material::drawInspector(ApplicationContext& context) {
+
+    if(EditorUtils::DrawResourcePicker<Shader>(context, "Shader", m_shader, false))
+        syncShaderProperties();
 
     // TODO beautify property names for inspector rendering!! (editor/EditorUtils.hpp)
     for (auto& [propertyName, value] : m_properties) {
@@ -72,9 +77,5 @@ void Material::drawInspector(ApplicationContext& context) {
             }
             ImGui::EndPopup();
         }
-    }
-
-    if(EditorUtils::DrawResourcePicker<Shader>(context, "Shader", m_shader)){
-        syncShaderProperties();
     }
 }

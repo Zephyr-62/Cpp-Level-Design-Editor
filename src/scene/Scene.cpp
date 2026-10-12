@@ -9,6 +9,13 @@ SceneObject& Scene::createObject(std::string name) {
 	return ref;
 }
 
+SceneObject& Scene::createObject(SceneObject* sceneObj) {
+	auto ref = sceneObj->duplicate();
+	m_objects.push_back(std::move(ref));
+
+	return *ref;
+}
+
 void Scene::removeObject(SceneObject* obj){
 	m_deletePendingObjs.insert(obj);
 }

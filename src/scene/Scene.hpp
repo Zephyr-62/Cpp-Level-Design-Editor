@@ -10,6 +10,8 @@
 class Scene {
 public:
     SceneObject& createObject(std::string name);
+    SceneObject& createObject(SceneObject* sceneObj);
+
     void removeObject(SceneObject* scnObj);
 
     void Update(ApplicationContext& context) {

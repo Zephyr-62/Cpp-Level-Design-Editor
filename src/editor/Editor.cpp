@@ -3,6 +3,7 @@
 
 #include "core/Window.hpp"
 #include "scene/Scene.hpp"
+#include "scene/SceneObject.hpp"
 #include "editor/EditorCamera.hpp"
 #include "resources/ResourceManager.hpp"
 #include "core/Constants.hpp"
@@ -33,6 +34,28 @@ Editor::~Editor(){
     ImGui::DestroyContext();
 }
 
+void Editor::processInput(Scene& scene, ApplicationContext& context){
+
+    if(m_input_newObjectRequested){
+        m_input_newObjectRequested = false;
+        scene.createObject("New_Object");
+    }
+
+    if(m_input_duplicateSelectedObject){
+        m_input_duplicateSelectedObject = false;
+
+        if(auto selectedObj = getSelectedSceneObject())
+            scene.createObject(selectedObj);
+    }
+
+    if(m_input_deleteSelectedObjects){
+        m_input_deleteSelectedObjects = false;
+        if(auto selectedObj = getSelectedSceneObject())
+            scene.removeObject(selectedObj);
+    }
+
+}
+
 
 void Editor::beginFrame(){
     ImGui_ImplOpenGL3_NewFrame();
@@ -49,9 +72,13 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
 
     setupDockspace();
 
-    // Draw all the editor panels
-    // Hierarchy, Inspector, Viewport, Resources...
+    drawViewport(context, colorTexture);    
+    drawHierarchy(scene);
+    drawResourcesPanel(context);
+    drawInspector(context);
+}
 
+void Editor::drawViewport(ApplicationContext& context, unsigned int colorTexture){
     // Viewport Panel
     ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_MenuBar);
     ImVec2 viewportCursorPos = ImGui::GetCursorPos();
@@ -104,10 +131,10 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
         ImGui::EndMenuBar();
     }
     ImGui::End();
+}
 
-    // SceneObject Hierarchy Panel
+void Editor::drawHierarchy(Scene& scene){
     ImGui::Begin("Hierarchy", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
-    bool requestNewObj = false;
     
     for (const auto& obj : scene.objects()) {
         ImGui::PushID(obj.get());
@@ -133,29 +160,29 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
 
         ImGui::SameLine();
         ImGui::TextUnformatted(obj->name.c_str());
-        ImGui::PopID();        
-        
+        ImGui::PopID();
     }
-
-    // TODO move this into specific function to group all shortcuts together?
-    if(ImGui::Shortcut(ImGuiKey_N | ImGuiMod_Ctrl))
-        requestNewObj = true;                
 
     if(ImGui::BeginMenuBar()){
         if(ImGui::BeginMenu("Add##scene object")){
             if(ImGui::MenuItem("New Object", "Ctrl+N"))
-                requestNewObj = true;                
+                m_input_newObjectRequested = true;                
             ImGui::EndMenu();
         }            
         ImGui::EndMenuBar();
     }
-    if(requestNewObj){
-        scene.createObject("New_Object");
-    }
+
+    if(ImGui::Shortcut(ImGuiKey_N | ImGuiMod_Ctrl))
+        m_input_newObjectRequested = true;
+    if(ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_D))
+        m_input_duplicateSelectedObject = true;
+    if(ImGui::Shortcut(ImGuiKey_Delete))
+        m_input_deleteSelectedObjects = true;
+
     ImGui::End();
+}
 
-
-    // Resources Panel
+void Editor::drawResourcesPanel(ApplicationContext& context){
     ImGui::Begin("Resources", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
     for(const auto& resourceType: context.resourceManager.getResourceTypes()){
         if (ImGui::CollapsingHeader(resourceType.c_str(), ImGuiTreeNodeFlags_Framed)) {
@@ -169,8 +196,9 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
         }
     }
     ImGui::End();
+}
 
-    // Inspector Panel
+void Editor::drawInspector(ApplicationContext& context){
     ImGui::Begin("Inspector", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
     if (m_selectedInspectable) {
 
@@ -188,8 +216,8 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
         }
     }
     ImGui::End();
-
 }
+
 
 void Editor::endFrame(){
     ImGui::Render();
@@ -246,10 +274,10 @@ void Editor::setupDockspace(){
 }
 
 
-Inspectable* Editor::getSelectedSceneObject() const{
+SceneObject* Editor::getSelectedSceneObject() const{
     if(m_selectedInspectable){
-        if(dynamic_cast<SceneObject*>(m_selectedInspectable))
-            return m_selectedInspectable;
+        if(auto retVal = dynamic_cast<SceneObject*>(m_selectedInspectable))
+            return retVal;
     }
 
     return nullptr;
@@ -257,5 +285,4 @@ Inspectable* Editor::getSelectedSceneObject() const{
 
 void Editor::clearSelectedSceneObject(){
     m_selectedInspectable = nullptr;
-
 }

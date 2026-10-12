@@ -18,4 +18,6 @@ public:
 
 	const char* inspectorName() const override { return "Transform"; }
 	void drawInspector(ApplicationContext& context) override;
+
+	virtual std::unique_ptr<Component> clone() const override;
 };

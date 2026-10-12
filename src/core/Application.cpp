@@ -106,11 +106,8 @@ void Application::Run() {
         /// Update Camera
         // Focus on object if requested
         if(m_camera.consumeRequestedFocus()){        
-            if(auto inspectable = m_editor.getSelectedSceneObject())
-            {
-                SceneObject* sceneObj = dynamic_cast<SceneObject*>(inspectable);
-                m_camera.focusPosition(sceneObj->transform->position);                
-            }
+            if(auto sceneObj = m_editor.getSelectedSceneObject())
+                m_camera.focusPosition(sceneObj->transform->position);
         }
         // Move acording to input
         m_camera.update(m_window, m_elapsedTime/1000.0, m_editor.isViewportFocused());
@@ -124,8 +121,9 @@ void Application::Run() {
         m_scene.Update(m_context);
 
 
-        /// Render loop
+        /// Editor+Render loop
         m_editor.beginFrame();
+        m_editor.processInput(m_scene, m_context);
         auto viewportSize = m_editor.viewportPanelSize();
         m_renderer.Render(m_scene, m_context, viewportSize.x, viewportSize.y);
         auto colorBuffer = m_renderer.getColorBuffer();

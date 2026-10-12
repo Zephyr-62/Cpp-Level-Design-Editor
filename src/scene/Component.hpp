@@ -3,6 +3,7 @@
 #include "editor/Inspectable.hpp"
 
 #include <imgui.h>
+#include <memory>
 
 // Wrapping to differentiate from other inspectable elements 
 // These can be direct additions to a Scene Object, unlike e.g. resources
@@ -15,5 +16,7 @@ public:
 
     // Invoked once per frame, before rendering
     virtual void Update(ApplicationContext& context) {};
+
+    virtual std::unique_ptr<Component> clone() const = 0;
 
 };

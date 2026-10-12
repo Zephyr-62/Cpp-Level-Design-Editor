@@ -4,8 +4,24 @@
 #include <imgui.h>
 #include <algorithm>
 
-SceneObject::SceneObject(std::string objectName) : name(std::move(objectName)) {
-    transform = &addComponent<Transform>();
+SceneObject::SceneObject(std::string objectName, std::unique_ptr<Transform> transform) : name(std::move(objectName)) {
+    this->transform = transform.get();
+    this->m_components.push_back(std::move(transform));
+}
+
+SceneObject::SceneObject(std::string objectName) : 
+    SceneObject::SceneObject(std::move(objectName), std::make_unique<Transform>()){}
+
+std::unique_ptr<SceneObject> SceneObject::duplicate() const {
+    auto scnObjCopy = std::make_unique<SceneObject>(this->name, std::make_unique<Transform>(*this->transform));
+    
+    for(const auto& component : m_components){
+        if (component.get() == this->transform)
+            continue;
+        scnObjCopy->m_components.push_back(component->clone());
+    }
+
+    return scnObjCopy;
 }
 
 

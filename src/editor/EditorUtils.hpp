@@ -24,7 +24,7 @@ public:
     /// @param resource a reference to the shared pointer of the resource to be modified
     /// @return true if the resource was changed, false otherwise
     template <typename T>
-    static bool DrawResourcePicker(ApplicationContext& context, const std::string& label, std::shared_ptr<T>& resource)
+    static bool DrawResourcePicker(ApplicationContext& context, const std::string& label, std::shared_ptr<T>& resource, bool canHaveNone=true)
     {
         std::string popupId = "Select " + label;
         bool resourceChanged = false;
@@ -50,11 +50,13 @@ public:
 
         if (ImGui::BeginPopup(popupId.c_str())) {
             ImGui::Text("Select a %s:", label.c_str()); 
-            ImGui::Separator();         
-            if(ImGui::Selectable("None")){
-                resource = nullptr;
-                resourceChanged = true;
-            }
+            ImGui::Separator();
+            if(canHaveNone){
+                if(ImGui::Selectable("None")){
+                    resource = nullptr;
+                    resourceChanged = true;
+                }
+            }    
             auto resources = context.resourceManager.getAll<T>();
             for (const auto& candidate : resources) {
                 if (ImGui::Selectable(candidate->id().c_str(), resource == candidate)) {

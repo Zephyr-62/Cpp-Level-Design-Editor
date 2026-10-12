@@ -23,3 +23,7 @@ glm::mat4 Transform::localMatrix() const {
 		   glm::mat4_cast(rotation) *
 		   glm::scale(glm::mat4(1.0f), scale);
 }
+
+std::unique_ptr<Component> Transform::clone() const{
+    return std::make_unique<Transform>(*this);
+}

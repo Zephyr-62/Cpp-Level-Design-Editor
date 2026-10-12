@@ -12,9 +12,17 @@
 #include <concepts>
 #include <unordered_set>
 
+#include <iostream>
+
 class SceneObject : public Inspectable {
 public:
+
+    SceneObject(std::string objectName, std::unique_ptr<Transform> transform);
     explicit SceneObject(std::string objectName);
+
+    ~SceneObject() {
+        std::cout << "object deleted: '" << name << "'" << std::endl;
+    }
 
     Transform* transform;
     std::string name;
@@ -63,6 +71,7 @@ public:
         // This is only a temporal solution
     };
 
+    std::unique_ptr<SceneObject> duplicate() const;
 
     virtual const char* inspectorName() const { return name.c_str(); }
     void drawInspector(ApplicationContext& context) override;
