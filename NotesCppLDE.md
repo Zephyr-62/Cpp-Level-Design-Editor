@@ -3,24 +3,49 @@
 
 ### Done
 
-- Editor
-	- Add/Remove Component (except for transform)
-	- Rename Scene Object
 
 ### TODO
+* Summary
+-- MVP --
+- Gizmos rendering + controls
+- Serialization -> resources
+	- Resources creation
+	- importer or exporter: obj, gltf
+- Transform Hierarchy
+	- Account for delete children, duplicate in place
+- Viewport object selection
+
+-- Nice to Have --
+- Rendering: lights/shadows, textures
+- Mass select -> duplicate/delete
+- Material instances: 
+	- material resource serves as a template
+	- each object can override the default values
+- Scene Cameras: override editor camera rendering and controls
+- Performance: frustum + backface culling
+- Resources: advanced view on inspector (render mesh/material)
+
+-- Future Work --
+- Mesh Editor!
+- Procedural mesh generation
+
+*Details
 - Editor utilities
+	- shared material/material instance --> resource instance? 
+		- resources could serve as templates, which then provide logic to track changes?
 	- create new resources?
 		- material, mesh (not for now --> mesh editor), (not shaders)
-	- Add/remove scene obejct
-		- Duplicate scene object (context + hotkey)
-		- SUPR deletes object
 	- Allow multiple selection in Hierarchy?
-		- mass delete
+		- mass clone/delete
 		- display common components in hierarchy?
 			- this is a _tedious_ implementation
 	
 	- Scene grid rendering
 	- Add gizmos controls (screen to scene ray projection)
+		- Transform
+		- Camera align with axis (+-x,y,z)
+		- grid granularity
+	- grid vertex snap
 	- Merge Meshes? a parent gets a mesh resulting from the fusion of every child's mesh (how to bridge faces/edges?)
 
 - Default meshes:
@@ -58,13 +83,6 @@
 - mesh editing? extrude faces, add edges...
 - procedural mesh generation!!
 	- grow from base mesh?
-
-### Main Loop
-
-- Render Screen
-	- Paint current selected view
-- Read Input 
-	- Execute actions based on context (current active view, registered actions...)
 
 ### Systems
 - Renderer
