@@ -36,7 +36,7 @@ void Renderer::Render(const Scene& scene, const ApplicationContext& context, int
 
 			auto shader = meshRenderer->material->getShader();
 			shader->use();
-			shader->setMat4("engine_mvp_mat", viewProjectionMatrix * obj.get()->transform.localMatrix());
+			shader->setMat4("engine_mvp_mat", viewProjectionMatrix * obj.get()->transform->localMatrix());
 			applyMaterialProperties(meshRenderer->material); // Use shader and set material properties into uniforms
 			
 			glBindVertexArray(meshRenderer->mesh->vao());

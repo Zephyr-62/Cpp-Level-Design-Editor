@@ -13,6 +13,8 @@
 
 #include <memory>
 
+// #define LD_IMGUI_DEMO
+
 Editor::Editor(const Window& window){
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -39,6 +41,12 @@ void Editor::beginFrame(){
 }
 
 void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorTexture){
+
+#ifdef LD_IMGUI_DEMO
+    ImGui::ShowDemoWindow();
+    return;
+#endif
+
     setupDockspace();
 
     // Draw all the editor panels
@@ -57,7 +65,7 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
         ImGui::SetCursorPos(ImVec2(viewportCursorPos.x, viewportCursorPos.y));
         ImGui::PushItemWidth(overlayWidth);
 
-        {
+        {   // Overlay fields
             ImGui::LabelText("Zoom Level", "%.2f", context.camera.getArcBallDist());
         }
 
@@ -82,7 +90,7 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
             int currentCameraMode = static_cast<int>(context.camera.perspectiveMode);
             if(ImGui::Combo("Perspective/Isometric", &currentCameraMode, filterNames, IM_ARRAYSIZE(filterNames))){
                 context.camera.perspectiveMode = static_cast<EditorCamera::CameraMode>(currentCameraMode);
-            }            
+            }
 
             ImGui::Separator();
 
@@ -98,15 +106,57 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
     ImGui::End();
 
     // SceneObject Hierarchy Panel
-    ImGui::Begin("Hierarchy", 0, ImGuiWindowFlags_NoCollapse & ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Hierarchy", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
+    bool requestNewObj = false;
+    
     for (const auto& obj : scene.objects()) {
-        if (ImGui::Selectable(obj->name.c_str(), m_selectedInspectable == obj.get()))
+        ImGui::PushID(obj.get());
+        if (ImGui::Selectable("##node", m_selectedInspectable == obj.get()))
             m_selectedInspectable = obj.get();
+        if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)){
+            EditorUtils::OpenRenamePopup(obj->name.c_str());           
+        }
+        if(auto newName = EditorUtils::DrawRenamePopup()){
+            obj->updateName(newName);
+        }
+
+        if(ImGui::IsItemClicked(ImGuiMouseButton_Right)){
+            ImGui::OpenPopup("hierarhchyContextMenu");
+        }
+
+        if(ImGui::BeginPopup("hierarhchyContextMenu")){
+            if(ImGui::Selectable("Delete Object")){
+                scene.removeObject(obj.get());
+            }
+            ImGui::EndPopup();
+        }
+
+        ImGui::SameLine();
+        ImGui::TextUnformatted(obj->name.c_str());
+        ImGui::PopID();        
+        
+    }
+
+    // TODO move this into specific function to group all shortcuts together?
+    if(ImGui::Shortcut(ImGuiKey_N | ImGuiMod_Ctrl))
+        requestNewObj = true;                
+
+    if(ImGui::BeginMenuBar()){
+        if(ImGui::BeginMenu("Add##scene object")){
+            if(ImGui::MenuItem("New Object", "Ctrl+N"))
+                requestNewObj = true;                
+            ImGui::EndMenu();
+        }            
+        ImGui::EndMenuBar();
+    }
+    if(requestNewObj){
+        scene.createObject("New_Object");
     }
     ImGui::End();
 
+
     // Resources Panel
-    ImGui::Begin("Resources", 0, ImGuiWindowFlags_NoCollapse & ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Resources", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
     for(const auto& resourceType: context.resourceManager.getResourceTypes()){
         if (ImGui::CollapsingHeader(resourceType.c_str(), ImGuiTreeNodeFlags_Framed)) {
             for (const auto& resource : context.resourceManager.getAll<Resource>()) {
@@ -120,21 +170,14 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
     }
     ImGui::End();
 
-
     // Inspector Panel
-    ImGui::Begin("Inspector", 0, ImGuiWindowFlags_NoCollapse & ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Inspector", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
     if (m_selectedInspectable) {
 
         // Scene Object Inspector
         if(dynamic_cast<SceneObject*>(m_selectedInspectable)){
             EditorUtils::DrawHeader("Scene Object");
-
             m_selectedInspectable->drawInspector(context);
-            ImGui::Separator();
-            if (ImGui::Button("Add Component")) {
-                // TODO: Display dropdown of available components to add e.g. MeshRenderer, Camera...
-                INFO_LOG("Add Component button clicked. (Functionality not implemented yet)");
-            }
         
         // Resource Inspector
         } else {
@@ -143,10 +186,8 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
             ImGui::Separator();
             m_selectedInspectable->drawInspector(context);
         }
-
     }
     ImGui::End();
-    
 
 }
 
@@ -212,4 +253,9 @@ Inspectable* Editor::getSelectedSceneObject() const{
     }
 
     return nullptr;
+}
+
+void Editor::clearSelectedSceneObject(){
+    m_selectedInspectable = nullptr;
+
 }

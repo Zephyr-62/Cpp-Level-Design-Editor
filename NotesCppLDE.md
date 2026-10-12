@@ -3,22 +3,37 @@
 
 ### Done
 
+- Editor
+	- Add/Remove Component (except for transform)
+	- Rename Scene Object
 
 ### TODO
 - Editor utilities
-	- Add Component
-	- Add scene obejct
-	- Rename scene object
-	- Duplicate scene object
-	- Delete scene object
+	- create new resources?
+		- material, mesh (not for now --> mesh editor), (not shaders)
+	- Add/remove scene obejct
+		- Duplicate scene object (context + hotkey)
+		- SUPR deletes object
+	- Allow multiple selection in Hierarchy?
+		- mass delete
+		- display common components in hierarchy?
+			- this is a _tedious_ implementation
+	
 	- Scene grid rendering
-	- Add gizmos controls (screen to scene ray projection) 
+	- Add gizmos controls (screen to scene ray projection)
+	- Merge Meshes? a parent gets a mesh resulting from the fusion of every child's mesh (how to bridge faces/edges?)
 
-- Camera SceneObject
-	- Select to drive as main editor camera, then switch back
+- Default meshes:
+	- cube, 3-pyramid, 4-pyramid, 
+	- procedural: circle, sphere, cone
+- Import .glb meshes?
 
 - Scene Hierarchy:
 	- TransformChild calculation (& caching?)
+
+- Camera SceneObject
+	- Preview camera? --> whole renderer pipeline duplicate
+	- Select to drive as main editor camera, then switch back (viewport button if EditorCamera.isOverriden)
 
 - Serialization of Resources:
 	- Mesh, material, 

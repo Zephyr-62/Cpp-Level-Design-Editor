@@ -54,9 +54,9 @@ void InitializeSmallScene(Scene& scene, ResourceManager& resourceManager) {
     auto& meshRenderer = sceneObj.addComponent<MeshRenderer>();
     meshRenderer.material = defaultMat;
     std::vector<Vertex> vertices = {
-        Vertex{{-0.433f, -0.25f, 0.0f}, {0, 0, 1}, {0, 0}},
-        Vertex{{0.433f, -0.25f, 0.0f},  {0, 0, 1}, {1, 0}},
-        Vertex{{0.0f,  0.5f, 0.0f},     {0, 0, 1}, {0.5f, 1}},
+        Vertex{{-0.5f, -0.433f, 0.0f}, {0, 0, 1}, {0, 0}},
+        Vertex{{0.5f, -0.433f, 0.0f},  {0, 0, 1}, {1, 0}},
+        Vertex{{0.0f,  0.433f, 0.0f},     {0, 0, 1}, {0.5f, 1}},
     };
     std::vector<std::uint32_t> indices = { 0, 1, 2 };
     resourceManager.add(std::make_shared<Mesh>("builtin:triangle",
@@ -97,23 +97,34 @@ void Application::Run() {
         m_lastFrameTime = currentFrameTime;
         m_applicationTime += m_elapsedTime;
 
-        // Editor loop
+        // Clear selection if an object was deleted last frame
+        if(m_context.hierarchyDeselectRequested){
+            m_editor.clearSelectedSceneObject();
+            m_context.hierarchyDeselectRequested = false;
+        }
+
+        /// Update Camera
+        // Focus on object if requested
         if(m_camera.consumeRequestedFocus()){        
             if(auto inspectable = m_editor.getSelectedSceneObject())
             {
                 SceneObject* sceneObj = dynamic_cast<SceneObject*>(inspectable);
-                m_camera.focusPosition(sceneObj->transform.position);                
-            }        
+                m_camera.focusPosition(sceneObj->transform->position);                
+            }
         }
+        // Move acording to input
         m_camera.update(m_window, m_elapsedTime/1000.0, m_editor.isViewportFocused());
 
 
-
-        // Scene Update loop
-        // Iterate through scene objects and run their update methods for every 'Runnable' component
+        /// Scene Update loop
+        // Iterate through scene objects and run their update methods
         // What should be the update order?
+        // For now its just scene->m_objects->m_components in list order
+        // (maybe it should follow the hierarchy once that is implemented)
+        m_scene.Update(m_context);
 
-        // Render loop
+
+        /// Render loop
         m_editor.beginFrame();
         auto viewportSize = m_editor.viewportPanelSize();
         m_renderer.Render(m_scene, m_context, viewportSize.x, viewportSize.y);

@@ -3,6 +3,10 @@
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+Transform::Transform() {
+    isRequired = true;
+}
+
 void Transform::drawInspector(ApplicationContext& context) {
     ImGui::DragFloat3("Position", &position.x, 0.05f);
 

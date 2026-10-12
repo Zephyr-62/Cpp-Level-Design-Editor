@@ -50,20 +50,18 @@ public:
 
         if (ImGui::BeginPopup(popupId.c_str())) {
             ImGui::Text("Select a %s:", label.c_str()); 
-
-            auto resources = context.resourceManager.getAll<T>();
-            if(!resources.empty()){
-                ImGui::Separator();         
-                for (const auto& candidate : resources) {
-                    if (ImGui::Selectable(candidate->id().c_str(), resource == candidate)) {
-                        resource = candidate;
-                        resourceChanged = true;
-                        ImGui::CloseCurrentPopup();
-                    }
-                }
+            ImGui::Separator();         
+            if(ImGui::Selectable("None")){
+                resource = nullptr;
+                resourceChanged = true;
             }
-            else {
-                ImGui::Text("No %s resources available.", label.c_str());
+            auto resources = context.resourceManager.getAll<T>();
+            for (const auto& candidate : resources) {
+                if (ImGui::Selectable(candidate->id().c_str(), resource == candidate)) {
+                    resource = candidate;
+                    resourceChanged = true;
+                    ImGui::CloseCurrentPopup();
+                }
             }
             ImGui::EndPopup();
         }
@@ -86,4 +84,37 @@ public:
     static void DrawInspectableName(const char* text) {
         Text(text, 1.2f, {1.0f, 0.8f, 0.3f, 1.0f});
     }
+
+    
+    #define RENAME_BUFFER_SIZE 256
+    static char* renameBuffer() {
+        static char buffer[RENAME_BUFFER_SIZE] = {};
+        return buffer;
+    }
+
+    static void OpenRenamePopup(const char* currentText){
+        auto buffer = EditorUtils::renameBuffer();
+        ImGui::OpenPopup("renamePopup");
+        snprintf(buffer, RENAME_BUFFER_SIZE, currentText);
+    }
+
+    // Returns new text if finished
+    static const char* DrawRenamePopup(){    
+        const char* returnText = nullptr;    
+        auto buffer = EditorUtils::renameBuffer();
+        if(ImGui::BeginPopup("renamePopup")){
+            EditorUtils::DrawHeader("Change object name:");
+            
+            if(ImGui::InputText("##inputTextRename", buffer, RENAME_BUFFER_SIZE, ImGuiInputTextFlags_EnterReturnsTrue)){
+                ImGui::CloseCurrentPopup();
+            }
+            if (ImGui::IsItemDeactivatedAfterEdit()) {
+                returnText = buffer;
+            }            
+            ImGui::EndPopup();
+        }
+        return returnText;
+    }
+
+
 };

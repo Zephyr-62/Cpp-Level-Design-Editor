@@ -1,18 +1,38 @@
 #pragma once
 
-#include "components/Transform.hpp"
 #include "scene/Component.hpp"
+
+// All components
+#include "components/Transform.hpp"
+#include "components/MeshRenderer.hpp"
 
 #include <memory>
 #include <string>
 #include <vector>
+#include <concepts>
+#include <unordered_set>
 
 class SceneObject : public Inspectable {
 public:
     explicit SceneObject(std::string objectName);
 
+    Transform* transform;
+    std::string name;
+    
+    // Invoked once per frame, before rendering
+    void Update(ApplicationContext& context);
+
+    // New name is rejected if empty
+    void updateName(const char* newName);
+
+    /// Adds a new component of the given type
+    /// If the component already exists this method returns it 
     template <typename T>
+        requires std::derived_from<T, Component>
     T& addComponent() {
+        if(T* match = getComponent<T>()) // Safe guard to avoid component duplicates
+            return *match;
+
         auto component = std::make_unique<T>();
         T& ref = *component;
         m_components.push_back(std::move(component));
@@ -20,6 +40,7 @@ public:
     }
 
     template <typename T>
+        requires std::derived_from<T, Component>
     T* getComponent() const {
         for (const auto& component : m_components) {
             if (T* match = dynamic_cast<T*>(component.get())) {
@@ -29,15 +50,31 @@ public:
         return nullptr;
     }
 
-	virtual const char* inspectorName() const { return name.c_str(); }
-    void drawInspector(ApplicationContext& context) override;
+    struct ComponentType{
+        const char* name;
+        void (*addComponent)(SceneObject&);
+    };
 
-    Transform transform;
-    std::string name;
+    const std::vector<ComponentType> componentFactory = { 
+        // {"Transform", [](SceneObject& so) {so.addComponent<Transform>();}}, //NOTE: Transforms cant be added 
+        {"Mesh Renderer", [](SceneObject& so) {so.addComponent<MeshRenderer>();}},
+        // Cameras, lights, custom script components
+        // TODO (must be discoverable automatically! --> components register themselves?)...
+        // This is only a temporal solution
+    };
+
+
+    virtual const char* inspectorName() const { return name.c_str(); }
+    void drawInspector(ApplicationContext& context) override;
 
 private:
 	//SceneObject* parent = nullptr;
 	//std::vector<SceneObject*> children;
 
     std::vector<std::unique_ptr<Component>> m_components;
+
+    // Remove components from m_componets
+    // Watch out for iterations/dangling pointers before invoking this method 
+    void deletePendingComponents();
+    std::unordered_set<Component*> m_deletePendingComponent; 
 };

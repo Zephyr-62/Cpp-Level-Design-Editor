@@ -24,6 +24,7 @@ public:
     bool isViewportFocused() const { return m_viewportFocused; }
 
     Inspectable* getSelectedSceneObject() const;
+    void clearSelectedSceneObject();
 
 private:
     void setupDockspace();

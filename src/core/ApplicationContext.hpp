@@ -8,4 +8,6 @@ struct ApplicationContext {
     ResourceManager& resourceManager;
     EditorCamera& camera;
     Window& window;
+
+    bool hierarchyDeselectRequested = false;
 };
