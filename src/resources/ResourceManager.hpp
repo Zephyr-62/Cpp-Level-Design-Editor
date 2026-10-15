@@ -9,6 +9,9 @@
 
 class ResourceManager {
 public:
+
+    void initializeBuiltinResources();
+
     template <typename T>
     std::shared_ptr<T> get(const std::string& id) const {
         auto it = m_resources.find(id);

@@ -2,6 +2,9 @@
 
 #include <imgui.h>
 
+#include "editor/Gizmos.hpp"
+#include "renderer/OverlayItem.hpp"
+
 class Window;
 class Scene;
 class SceneObject;
@@ -23,6 +26,8 @@ public:
     void draw(Scene& scene, ApplicationContext& context, unsigned int colorTexture);
     void endFrame();
 
+    std::vector<OverlayItem> buildOverlay(ApplicationContext& context);
+
     ImVec2 viewportPanelSize() const { return m_viewportSize; }
     bool isViewportFocused() const { return m_viewportFocused; }
 
@@ -37,12 +42,13 @@ private:
     void drawResourcesPanel(ApplicationContext& context);
     void drawInspector(ApplicationContext& context);
 
-
     ImVec2 m_viewportSize;
     Inspectable* m_selectedInspectable = nullptr;
     bool m_viewportFocused = false;
     bool m_showViewportStats = true;
-
+    
+    Gizmos m_gizmos;
+    float m_gizmosScale = 0.15f;
 
     // Input flags
     bool m_input_newObjectRequested = false;

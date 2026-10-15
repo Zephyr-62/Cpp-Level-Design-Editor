@@ -31,10 +31,10 @@ private:
 	void Shutdown();
 
 	Window m_window{ 1600, 900, "Level Editor" };
+	ResourceManager m_resourceManager;
 	Renderer m_renderer;
 	Editor m_editor{ m_window };
 	EditorCamera m_camera;
-	ResourceManager m_resourceManager;
 	Scene m_scene;
 
 	ApplicationContext m_context{ m_resourceManager, m_camera, m_window };

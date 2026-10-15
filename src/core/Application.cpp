@@ -6,7 +6,6 @@
 
 #include <iostream>
 #include <memory>
-#include <filesystem>
 #include <chrono>
 #include <algorithm>
 
@@ -17,8 +16,12 @@
 #include "components/Transform.hpp"
 #include "scene/SceneObject.hpp"
 #include "components/MeshRenderer.hpp"
+#include "renderer/OverlayItem.hpp"
 
-Application::Application() {}
+Application::Application() {
+    m_resourceManager.initializeBuiltinResources();
+    m_renderer.initialize(m_context);
+}
 Application::~Application() { Shutdown(); }
 
 void InitializeSmallScene(Scene& scene, ResourceManager& resourceManager);
@@ -36,46 +39,19 @@ void Application::LoadScene(const std::string& scenePath) {
 
 // Adds 2 shaders, 1 material, 1 triangle mesh, 1 scene object
 void InitializeSmallScene(Scene& scene, ResourceManager& resourceManager) {
-    SceneObject& sceneObj = scene.createObject("Triangle");
 
-    auto whiteShader = std::make_shared<Shader>("builtin:white",
-        std::filesystem::path::path("builtin_resources/shaders/unlit.vert").string(),
-        std::filesystem::path::path("builtin_resources/shaders/white.frag").string());
-    resourceManager.add(whiteShader);
-
-    auto unlitShader = std::make_shared<Shader>("builtin:unlit",
-        std::filesystem::path::path("builtin_resources/shaders/unlit.vert").string(),
-        std::filesystem::path::path("builtin_resources/shaders/unlit.frag").string());
-    resourceManager.add(unlitShader);
-    
-    auto defaultMat = std::make_shared<Material>("builtin:defaultMat", unlitShader);
-    resourceManager.add(defaultMat);
-
+    SceneObject& sceneObj = scene.createObject("Cone");
     auto& meshRenderer = sceneObj.addComponent<MeshRenderer>();
-    meshRenderer.material = defaultMat;
-    std::vector<Vertex> vertices = {
-        Vertex{{-0.5f, -0.433f, 0.0f}, {0, 0, 1}, {0, 0}},
-        Vertex{{0.5f, -0.433f, 0.0f},  {0, 0, 1}, {1, 0}},
-        Vertex{{0.0f,  0.433f, 0.0f},     {0, 0, 1}, {0.5f, 1}},
-    };
-    std::vector<std::uint32_t> indices = { 0, 1, 2 };
-    resourceManager.add(std::make_shared<Mesh>("builtin:triangle",
-        vertices,
-        indices
-    ));
-    meshRenderer.mesh = resourceManager.get<Mesh>("builtin:triangle");
+    meshRenderer.material = resourceManager.get<Material>("builtin:defaultMat");
+    meshRenderer.mesh = resourceManager.get<Mesh>("builtin:cone");
+    sceneObj.transform->position = glm::vec3(0, 1, 0);
 
-    vertices = {
-        Vertex{{-0.5f, -0.5f, 0}, {0, 0, 1}, {0, 0} },
-        Vertex{{-0.5f,  0.5f, 0}, {0, 0, 1}, {0, 1} },
-        Vertex{{ 0.5f,  0.5f, 0}, {0, 0, 1}, {1, 1}},
-        Vertex{{ 0.5f, -0.5f, 0}, {0, 0, 1}, {1, 0}},
-    };
-    indices = { 0, 1, 2, 2, 3, 0 };
-    resourceManager.add(std::make_shared<Mesh>("builtin:quad",
-        vertices,
-        indices
-    ));
+    SceneObject& sceneObj2 = scene.createObject("Cube");
+    auto& meshRenderer2 = sceneObj2.addComponent<MeshRenderer>();
+    meshRenderer2.material = resourceManager.get<Material>("builtin:defaultMat");
+    meshRenderer2.mesh = resourceManager.get<Mesh>("builtin:torus");
+    sceneObj2.transform->position = glm::vec3(-2);
+
 }
 
 void Application::Run() {
@@ -125,7 +101,8 @@ void Application::Run() {
         m_editor.beginFrame();
         m_editor.processInput(m_scene, m_context);
         auto viewportSize = m_editor.viewportPanelSize();
-        m_renderer.Render(m_scene, m_context, viewportSize.x, viewportSize.y);
+        auto overlayItems = m_editor.buildOverlay(m_context);
+        m_renderer.Render(m_scene, m_context, viewportSize.x, viewportSize.y, overlayItems);
         auto colorBuffer = m_renderer.getColorBuffer();
         m_editor.draw(m_scene, m_context, colorBuffer);
         m_editor.endFrame();

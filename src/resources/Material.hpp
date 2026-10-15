@@ -10,6 +10,12 @@
 
 using MaterialPropertyValue = std::variant<float, glm::vec2, glm::vec3, glm::vec4>;
 
+enum class FaceCulling{
+    NONE,
+    BACK,
+    FRONT,
+};
+
 class Material : public Resource {
     public:
     Material(std::string id, std::shared_ptr<Shader> shader);
@@ -30,6 +36,7 @@ class Material : public Resource {
     virtual const char* Inspectable::inspectorName() const override { return "Material"; }
     virtual void drawInspector(ApplicationContext& context) override;
 
+    FaceCulling faceCulling = FaceCulling::BACK;
 
 private:
     std::shared_ptr<Shader> m_shader;

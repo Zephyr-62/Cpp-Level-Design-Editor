@@ -5,7 +5,7 @@
 
 class EditorCamera {
 public:
-    enum CameraMode: int{
+    enum ProjectionMode: int{
         PERSPECTIVE,
         ISOMETRIC
     };
@@ -18,7 +18,7 @@ public:
     float nearPlane = 0.1f;
     float farPlane = 100.0f;
     float orthoSize = 10.0f;
-    CameraMode perspectiveMode = CameraMode::PERSPECTIVE;
+    ProjectionMode projectionMode = ProjectionMode::PERSPECTIVE;
     
     float moveSpeed = 3.0f;         // units per second
     float fastMultiplier = 3.0f;    // applied while the speed-boost key is held
@@ -41,9 +41,15 @@ public:
 
     float& getArcBallDist() { return m_arcBallDistance; }
 
+    bool isCamMoveActive() { return m_camMoveActive; }
+
+    float worldUnitsPerPixel(glm::vec3 position);
+
 private:
     glm::vec2 m_lastCursorPos{0.0f};
+    bool m_isLooking = false;
     bool m_wasLooking = false;
+    bool m_camMoveActive = false;
     float m_arcBallDistance = 2; // measured in units
     glm::vec3 m_lastArcBallPos {0.0f};
 

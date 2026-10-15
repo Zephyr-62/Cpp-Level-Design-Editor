@@ -34,15 +34,18 @@ class Shader : public Resource {
         void setVec2(const std::string& name, const glm::vec2& value) const;
         void setVec3(const std::string& name, const glm::vec3& value) const;
         void setVec4(const std::string& name, const glm::vec4& value) const;
+        void setMat3(const std::string& name, const glm::mat3& value) const;
         void setMat4(const std::string& name, const glm::mat4& value) const;
 
         const char* inspectorName() const override { return "Shader";}
         
+        bool hasUniform(const std::string& name) const;
+        
     private:
         unsigned int m_programId;
-
-        UniformType toUniformType(GLenum glType) const;
+        
         bool isEngineUniform(const std::string& name) const;
+        UniformType toUniformType(GLenum glType) const;
 
         static std::string readFile(const std::string& path);
         static unsigned int compileShader(unsigned int type, const std::string& source);

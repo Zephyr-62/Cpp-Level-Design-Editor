@@ -46,6 +46,16 @@ void Material::drawInspector(ApplicationContext& context) {
     if(EditorUtils::DrawResourcePicker<Shader>(context, "Shader", m_shader, false))
         syncShaderProperties();
 
+    static const char* filterNames[] = {
+        "None",
+        "Back",
+        "Front",
+    };
+    int currentFaceCulling = static_cast<int>(faceCulling);
+    if(ImGui::Combo("Face Culling", &currentFaceCulling, filterNames, IM_ARRAYSIZE(filterNames))){
+        faceCulling = static_cast<FaceCulling>(currentFaceCulling);
+    }
+
     // TODO beautify property names for inspector rendering!! (editor/EditorUtils.hpp)
     for (auto& [propertyName, value] : m_properties) {
         if(std::holds_alternative<float>(value)){

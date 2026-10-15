@@ -1,11 +1,7 @@
 
 # Level Design Engine Tool
 
-### Done
-
-
-### TODO
-* Summary
+### Roadmap
 -- MVP --
 - Gizmos rendering + controls
 - Serialization -> resources
@@ -16,7 +12,7 @@
 - Viewport object selection
 
 -- Nice to Have --
-- Rendering: lights/shadows, textures
+- Rendering: shadows, textures
 - Mass select -> duplicate/delete
 - Material instances: 
 	- material resource serves as a template
@@ -29,29 +25,47 @@
 - Mesh Editor!
 - Procedural mesh generation
 
-*Details
+### Done
+
+- Mesh generator: eqTriangle/quad/cube/cone/cylinder/torus
+- New shader: diffuse
+- Gizmos: Render tranform handles
+- Editor
+	- deselect scene object
+	- autofocus rename field
+- Renderer: dont use engine uniforms if they dont exist
+	
+### TODO
+
+- meshFactory: circle
+- meshFactory: pyramid { return cylinder(smoothShading = false);} !! start offset: -90 on evenSided, -45 oddSided
+- meshFactory.cylinder: renderCaps=true/false; smoothShading:true/false (duplicates every vertex)
+
+- Gizmos
+	- Implement gizmos Controls
+		- grid snapping?
+- Scene grid rendering
+	- grid granularity? --> based on zoom?
+
+
 - Editor utilities
+	- Camera align with axis (+-x,y,z)
+	- Lock scale: every axis scales uniformly
 	- shared material/material instance --> resource instance? 
 		- resources could serve as templates, which then provide logic to track changes?
-	- create new resources?
-		- material, mesh (not for now --> mesh editor), (not shaders)
+	- create new resources --> popup with constructor requirements (id, ...)
+		- material
+		- mesh (not for now --> mesh editor)
 	- Allow multiple selection in Hierarchy?
+		- _this_is_a_*tedious*_implementation_
 		- mass clone/delete
+		- gizmos: calculate center transform, apply transformation to every object based on local/global setting
 		- display common components in hierarchy?
-			- this is a _tedious_ implementation
-	
-	- Scene grid rendering
-	- Add gizmos controls (screen to scene ray projection)
-		- Transform
-		- Camera align with axis (+-x,y,z)
-		- grid granularity
-	- grid vertex snap
 	- Merge Meshes? a parent gets a mesh resulting from the fusion of every child's mesh (how to bridge faces/edges?)
 
 - Default meshes:
-	- cube, 3-pyramid, 4-pyramid, 
-	- procedural: circle, sphere, cone
-- Import .glb meshes?
+	- procedural: sphere
+- Import .glb meshes
 
 - Scene Hierarchy:
 	- TransformChild calculation (& caching?)

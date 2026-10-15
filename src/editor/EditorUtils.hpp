@@ -106,12 +106,13 @@ public:
         auto buffer = EditorUtils::renameBuffer();
         if(ImGui::BeginPopup("renamePopup")){
             EditorUtils::DrawHeader("Change object name:");
-            
+            ImGui::SetKeyboardFocusHere(1);
             if(ImGui::InputText("##inputTextRename", buffer, RENAME_BUFFER_SIZE, ImGuiInputTextFlags_EnterReturnsTrue)){
                 ImGui::CloseCurrentPopup();
             }
             if (ImGui::IsItemDeactivatedAfterEdit()) {
                 returnText = buffer;
+                ImGui::CloseCurrentPopup();
             }            
             ImGui::EndPopup();
         }

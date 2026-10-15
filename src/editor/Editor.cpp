@@ -78,6 +78,15 @@ void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorT
     drawInspector(context);
 }
 
+std::vector<OverlayItem> Editor::buildOverlay(ApplicationContext& context){
+    if(auto scnObj = dynamic_cast<SceneObject*>(m_selectedInspectable)){
+        return m_gizmos.buildOverlay(*scnObj->transform, m_gizmosScale * context.camera.worldUnitsPerPixel(scnObj->transform->position));
+    }
+
+    return std::vector<OverlayItem>();
+}
+
+
 void Editor::drawViewport(ApplicationContext& context, unsigned int colorTexture){
     // Viewport Panel
     ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_MenuBar);
@@ -88,21 +97,22 @@ void Editor::drawViewport(ApplicationContext& context, unsigned int colorTexture
     
     // Viewport Overlay
     if(m_showViewportStats){
-        float overlayWidth = ImGui::GetContentRegionAvail().x * 0.20f;
+        float overlayWidth = ImGui::GetContentRegionAvail().x * 0.2f;
         ImGui::SetCursorPos(ImVec2(viewportCursorPos.x, viewportCursorPos.y));
-        ImGui::PushItemWidth(overlayWidth);
-
+        
         {   // Overlay fields
-            ImGui::LabelText("Zoom Level", "%.2f", context.camera.getArcBallDist());
+            ImGui::LabelText("##zoomLevel", "Zoom Level: %.2f", context.camera.getArcBallDist());
+            ImGui::LabelText("##Transform", "Transform: %s Space", m_gizmos.getTransformMode() == TransformMode::GLOBAL_SPACE ? "Global" : "Local"); 
         }
+        
 
-        ImGui::PopItemWidth();
     }
 
     // Viewport Settigns Menu
     if(ImGui::BeginMenuBar()){
         if(ImGui::BeginMenu("Viewport Overlay")){
             ImGui::Checkbox("Display Stats", &m_showViewportStats);
+            ImGui::SliderFloat("Gizmos Scale", &m_gizmosScale, 0.1f, 0.5f, "%.2f");
             ImGui::EndMenu();
         }
         if(ImGui::BeginMenu("Camera Settings")){
@@ -114,9 +124,9 @@ void Editor::drawViewport(ApplicationContext& context, unsigned int colorTexture
                 "Perspective",
                 "Isometric"
             };
-            int currentCameraMode = static_cast<int>(context.camera.perspectiveMode);
-            if(ImGui::Combo("Perspective/Isometric", &currentCameraMode, filterNames, IM_ARRAYSIZE(filterNames))){
-                context.camera.perspectiveMode = static_cast<EditorCamera::CameraMode>(currentCameraMode);
+            int currentCameraMode = static_cast<int>(context.camera.projectionMode);
+            if(ImGui::Combo("Projection Mode", &currentCameraMode, filterNames, IM_ARRAYSIZE(filterNames))){
+                context.camera.projectionMode = static_cast<EditorCamera::ProjectionMode>(currentCameraMode);
             }
 
             ImGui::Separator();
@@ -130,12 +140,28 @@ void Editor::drawViewport(ApplicationContext& context, unsigned int colorTexture
         }    
         ImGui::EndMenuBar();
     }
+
+    if(!context.camera.isCamMoveActive()){
+        if(ImGui::Shortcut(ImGuiKey_Q))
+            m_gizmos.setGizmoMode(GizmoMode::TRANSFORM);
+        if(ImGui::Shortcut(ImGuiKey_W))
+            m_gizmos.setGizmoMode(GizmoMode::TRANSLATE);
+        if(ImGui::Shortcut(ImGuiKey_E))
+            m_gizmos.setGizmoMode(GizmoMode::ROTATE);
+        if(ImGui::Shortcut(ImGuiKey_R))
+            m_gizmos.setGizmoMode(GizmoMode::SCALE);
+    }
+
+    if(ImGui::Shortcut(ImGuiKey_T))
+        m_gizmos.toggleTransformMode();  
+    
     ImGui::End();
 }
 
 void Editor::drawHierarchy(Scene& scene){
     ImGui::Begin("Hierarchy", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
-    
+
+    // Draw scene objects tree
     for (const auto& obj : scene.objects()) {
         ImGui::PushID(obj.get());
         if (ImGui::Selectable("##node", m_selectedInspectable == obj.get()))
@@ -161,6 +187,12 @@ void Editor::drawHierarchy(Scene& scene){
         ImGui::SameLine();
         ImGui::TextUnformatted(obj->name.c_str());
         ImGui::PopID();
+    }
+
+    if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)
+        && !ImGui::IsAnyItemHovered())
+    {
+        m_selectedInspectable = nullptr;
     }
 
     if(ImGui::BeginMenuBar()){

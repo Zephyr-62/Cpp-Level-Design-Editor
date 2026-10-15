@@ -42,6 +42,11 @@ void Shader::use() const {
     glUseProgram(m_programId);
 }
 
+bool Shader::hasUniform(const std::string& name) const{
+    return glGetUniformLocation(m_programId, name.c_str()) != -1;
+}
+
+
 std::vector<UniformInfo> Shader::retrieveUniforms() const {
     std::vector<UniformInfo> result;
 
@@ -116,6 +121,15 @@ void Shader::setVec4(const std::string& name, const glm::vec4& value) const {
         return;
     }
     glUniform4fv(location, 1, glm::value_ptr(value));
+}
+
+void Shader::setMat3(const std::string& name, const glm::mat3& value) const {
+    int const location = glGetUniformLocation(m_programId, name.c_str());
+    if(location == -1) {
+        ERROR_LOG("Warning: uniform '" + name + "' not found in shader program.", ERROR_CODE_PROPERTY_NOT_FOUND);
+        return;
+    }
+    glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void Shader::setMat4(const std::string& name, const glm::mat4& value) const {
