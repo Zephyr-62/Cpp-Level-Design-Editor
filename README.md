@@ -16,9 +16,11 @@ I also found relevant the inclusion of an isometric camera, to have support for 
 ![Camera Projections](readmeImgs/cameraProjections.png)
 
 I implemented three types of camera movement: free camera flight (default), panning camera, and orbital camera (arcball).
-![Free Camera preview](readmeImgs/freeCam.gif)
-![Panning Camera preview](readmeImgs/panCam.gif)
-![Arcball Camera preview](readmeImgs/arcballCam.gif)
+<p align="center">
+  <img src="readmeImgs/freeCam.gif" width="32%" alt="Free Camera preview" />
+  <img src="readmeImgs/panCam.gif" width="32%" alt="Panning Camera preview" />
+  <img src="readmeImgs/arcballCam.gif" width="32%" alt="Arcball Camera preview" />
+</p>
 
 ### Roadmap
 -- MVP --
