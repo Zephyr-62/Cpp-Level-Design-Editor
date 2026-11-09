@@ -22,8 +22,8 @@ I implemented three types of camera movement: free camera flight (default), pann
   <img src="readmeImgs/arcballCam.gif" width="32%" alt="Arcball Camera preview" />
 </p>
 
-### Roadmap
--- MVP --
+## Roadmap
+### MVP
 - Gizmos rendering + controls
 	- (free) Viewport object selection
 - Serialization -> resources
@@ -32,7 +32,7 @@ I implemented three types of camera movement: free camera flight (default), pann
 - Transform Hierarchy
 	- Account for delete children, duplicate in place
 
--- Nice to Have --
+### Nice to Have
 - Rendering: shadows, textures
 - Mass select -> duplicate/delete
 - Material instances: 
@@ -42,6 +42,6 @@ I implemented three types of camera movement: free camera flight (default), pann
 - Performance: frustum culling
 - Resources: advanced view on inspector (render mesh/material)
 
--- Future Work --
+### Future Work
 - Mesh Editor!
 - Procedural mesh generation
