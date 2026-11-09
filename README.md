@@ -1,6 +1,8 @@
 # LevelDesignEditor
 Custom Engine in C++ made to quickly prototype level design
 
+![Editor Preview](readmeImgs/Cover.png)
+
 This is a WIP project that I'm currently using to learn C++. The idea is to create a lightweight tool to prototype level blockouts and export them as a glb scene.
 The UI closely mirrors Unity's editor, following the same architecture of scene objects that hold components.
 More details to come in the future.
@@ -8,10 +10,15 @@ More details to come in the future.
 ## A few implemented features...
 
 I have implemented a few default meshes to work with: Triangle, Quad, Cube, Cylinder, Cone, Pyramids, and Torus:
+![List of Default Meshes](readmeImgs/meshes.png)
 
 I also found relevant the inclusion of an isometric camera, to have support for games with this kind of projection.
+![Camera Projections](readmeImgs/cameraProjections.png)
 
 I implemented three types of camera movement: free camera flight (default), panning camera, and orbital camera (arcball).
+![Free Camera preview](readmeImgs/freeCam.gif)
+![Panning Camera preview](readmeImgs/panCam.gif)
+![Arcball Camera preview](readmeImgs/arcballCam.gif)
 
 ### Roadmap
 -- MVP --

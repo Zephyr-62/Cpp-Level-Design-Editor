@@ -4,12 +4,12 @@
 ### Roadmap
 -- MVP --
 - Gizmos rendering + controls
+	- (free) Viewport object selection
 - Serialization -> resources
 	- Resources creation
-	- importer or exporter: obj, gltf
+	- importer or exporter: obj, gltf, '.ldscn'
 - Transform Hierarchy
 	- Account for delete children, duplicate in place
-- Viewport object selection
 
 -- Nice to Have --
 - Rendering: shadows, textures
@@ -18,7 +18,7 @@
 	- material resource serves as a template
 	- each object can override the default values
 - Scene Cameras: override editor camera rendering and controls
-- Performance: frustum + backface culling
+- Performance: frustum culling
 - Resources: advanced view on inspector (render mesh/material)
 
 -- Future Work --
@@ -27,26 +27,20 @@
 
 ### Done
 
-- Mesh generator: eqTriangle/quad/cube/cone/cylinder/torus
-- New shader: diffuse
-- Gizmos: Render tranform handles
-- Editor
-	- deselect scene object
-	- autofocus rename field
-- Renderer: dont use engine uniforms if they dont exist
 	
 ### TODO
+
+- Gizmos Controls
 
 - meshFactory: circle
 - meshFactory: pyramid { return cylinder(smoothShading = false);} !! start offset: -90 on evenSided, -45 oddSided
 - meshFactory.cylinder: renderCaps=true/false; smoothShading:true/false (duplicates every vertex)
+- meshFactory: sphere
 
 - Gizmos
-	- Implement gizmos Controls
-		- grid snapping?
+		- grid snapping
 - Scene grid rendering
 	- grid granularity? --> based on zoom?
-
 
 - Editor utilities
 	- Camera align with axis (+-x,y,z)
@@ -63,15 +57,13 @@
 		- display common components in hierarchy?
 	- Merge Meshes? a parent gets a mesh resulting from the fusion of every child's mesh (how to bridge faces/edges?)
 
-- Default meshes:
-	- procedural: sphere
 - Import .glb meshes
 
 - Scene Hierarchy:
 	- TransformChild calculation (& caching?)
 
 - Camera SceneObject
-	- Preview camera? --> whole renderer pipeline duplicate
+	- Camera settings: perspective mode, fov, pitch/yaw?...
 	- Select to drive as main editor camera, then switch back (viewport button if EditorCamera.isOverriden)
 
 - Serialization of Resources:
@@ -86,6 +78,7 @@
 - Performance: Frustum + backface culling
 
 - Resources inspectors:
+	- Camera: preview
 	- Mesh: render in small view with default plain shader
 	- Material: render in quad
 
