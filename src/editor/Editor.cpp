@@ -1,0 +1,320 @@
+#include "editor/Editor.hpp"
+#include "editor/EditorUtils.hpp"
+
+#include "core/Window.hpp"
+#include "scene/Scene.hpp"
+#include "scene/SceneObject.hpp"
+#include "editor/EditorCamera.hpp"
+#include "resources/ResourceManager.hpp"
+#include "core/Constants.hpp"
+
+#include <imgui_internal.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+
+#include <memory>
+
+// #define LD_IMGUI_DEMO
+
+Editor::Editor(const Window& window){
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(window.handle(), true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+}
+
+Editor::~Editor(){
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void Editor::processInput(Scene& scene, ApplicationContext& context){
+
+    if(m_input_newObjectRequested){
+        m_input_newObjectRequested = false;
+        scene.createObject("New_Object");
+    }
+
+    if(m_input_duplicateSelectedObject){
+        m_input_duplicateSelectedObject = false;
+
+        if(auto selectedObj = getSelectedSceneObject())
+            scene.createObject(selectedObj);
+    }
+
+    if(m_input_deleteSelectedObjects){
+        m_input_deleteSelectedObjects = false;
+        if(auto selectedObj = getSelectedSceneObject())
+            scene.removeObject(selectedObj);
+    }
+
+}
+
+
+void Editor::beginFrame(){
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void Editor::draw(Scene& scene, ApplicationContext& context, unsigned int colorTexture){
+
+#ifdef LD_IMGUI_DEMO
+    ImGui::ShowDemoWindow();
+    return;
+#endif
+
+    setupDockspace();
+
+    drawViewport(context, colorTexture);    
+    drawHierarchy(scene);
+    drawResourcesPanel(context);
+    drawInspector(context);
+}
+
+std::vector<OverlayItem> Editor::buildOverlay(ApplicationContext& context){
+    if(auto scnObj = dynamic_cast<SceneObject*>(m_selectedInspectable)){
+        return m_gizmos.buildOverlay(*scnObj->transform, m_gizmosScale * context.camera.worldUnitsPerPixel(scnObj->transform->position));
+    }
+
+    return std::vector<OverlayItem>();
+}
+
+
+void Editor::drawViewport(ApplicationContext& context, unsigned int colorTexture){
+    // Viewport Panel
+    ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_MenuBar);
+    ImVec2 viewportCursorPos = ImGui::GetCursorPos();
+    m_viewportFocused = ImGui::IsWindowHovered();
+    m_viewportSize = ImGui::GetContentRegionAvail();
+    ImGui::Image((ImTextureID)(intptr_t)colorTexture, m_viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+    
+    // Viewport Overlay
+    if(m_showViewportStats){
+        float overlayWidth = ImGui::GetContentRegionAvail().x * 0.2f;
+        ImGui::SetCursorPos(ImVec2(viewportCursorPos.x, viewportCursorPos.y));
+        
+        {   // Overlay fields
+            ImGui::LabelText("##zoomLevel", "Zoom Level: %.2f", context.camera.getArcBallDist());
+            ImGui::LabelText("##Transform", "Transform: %s Space", m_gizmos.getTransformMode() == TransformMode::GLOBAL_SPACE ? "Global" : "Local"); 
+        }
+        
+
+    }
+
+    // Viewport Settigns Menu
+    if(ImGui::BeginMenuBar()){
+        if(ImGui::BeginMenu("Viewport Overlay")){
+            ImGui::Checkbox("Display Stats", &m_showViewportStats);
+            ImGui::SliderFloat("Gizmos Scale", &m_gizmosScale, 0.1f, 0.5f, "%.2f");
+            ImGui::EndMenu();
+        }
+        if(ImGui::BeginMenu("Camera Settings")){
+            ImGui::SliderFloat("Field Of View", &context.camera.fov, 22.5f, 120.0f);
+            ImGui::InputFloat("Near Plane", &context.camera.nearPlane);
+            ImGui::InputFloat("Far Plane", &context.camera.farPlane);
+            
+            static const char* filterNames[] = {
+                "Perspective",
+                "Isometric"
+            };
+            int currentCameraMode = static_cast<int>(context.camera.projectionMode);
+            if(ImGui::Combo("Projection Mode", &currentCameraMode, filterNames, IM_ARRAYSIZE(filterNames))){
+                context.camera.projectionMode = static_cast<EditorCamera::ProjectionMode>(currentCameraMode);
+            }
+
+            ImGui::Separator();
+
+            ImGui::SliderFloat("Camera Speed", &context.camera.moveSpeed, 0, 50);
+            ImGui::SliderFloat("Mouse Sensitivity", &context.camera.mouseSensitivity, 0.01f, 0.75f);
+            ImGui::SliderFloat("Zoom Speed", &context.camera.zoomSpeed, 0, 5);
+            ImGui::InputFloat("Zoom Level", &context.camera.getArcBallDist());
+
+            ImGui::EndMenu();
+        }    
+        ImGui::EndMenuBar();
+    }
+
+    if(!context.camera.isCamMoveActive()){
+        if(ImGui::Shortcut(ImGuiKey_Q))
+            m_gizmos.setGizmoMode(GizmoMode::TRANSFORM);
+        if(ImGui::Shortcut(ImGuiKey_W))
+            m_gizmos.setGizmoMode(GizmoMode::TRANSLATE);
+        if(ImGui::Shortcut(ImGuiKey_E))
+            m_gizmos.setGizmoMode(GizmoMode::ROTATE);
+        if(ImGui::Shortcut(ImGuiKey_R))
+            m_gizmos.setGizmoMode(GizmoMode::SCALE);
+    }
+
+    if(ImGui::Shortcut(ImGuiKey_T))
+        m_gizmos.toggleTransformMode();  
+    
+    ImGui::End();
+}
+
+void Editor::drawHierarchy(Scene& scene){
+    ImGui::Begin("Hierarchy", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
+
+    // Draw scene objects tree
+    for (const auto& obj : scene.objects()) {
+        ImGui::PushID(obj.get());
+        if (ImGui::Selectable("##node", m_selectedInspectable == obj.get()))
+            m_selectedInspectable = obj.get();
+        if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)){
+            EditorUtils::OpenRenamePopup(obj->name.c_str());           
+        }
+        if(auto newName = EditorUtils::DrawRenamePopup()){
+            obj->updateName(newName);
+        }
+
+        if(ImGui::IsItemClicked(ImGuiMouseButton_Right)){
+            ImGui::OpenPopup("hierarhchyContextMenu");
+        }
+
+        if(ImGui::BeginPopup("hierarhchyContextMenu")){
+            if(ImGui::Selectable("Delete Object")){
+                scene.removeObject(obj.get());
+            }
+            ImGui::EndPopup();
+        }
+
+        ImGui::SameLine();
+        ImGui::TextUnformatted(obj->name.c_str());
+        ImGui::PopID();
+    }
+
+    if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)
+        && !ImGui::IsAnyItemHovered())
+    {
+        m_selectedInspectable = nullptr;
+    }
+
+    if(ImGui::BeginMenuBar()){
+        if(ImGui::BeginMenu("Add##scene object")){
+            if(ImGui::MenuItem("New Object", "Ctrl+N"))
+                m_input_newObjectRequested = true;                
+            ImGui::EndMenu();
+        }            
+        ImGui::EndMenuBar();
+    }
+
+    if(ImGui::Shortcut(ImGuiKey_N | ImGuiMod_Ctrl))
+        m_input_newObjectRequested = true;
+    if(ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_D))
+        m_input_duplicateSelectedObject = true;
+    if(ImGui::Shortcut(ImGuiKey_Delete))
+        m_input_deleteSelectedObjects = true;
+
+    ImGui::End();
+}
+
+void Editor::drawResourcesPanel(ApplicationContext& context){
+    ImGui::Begin("Resources", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
+    for(const auto& resourceType: context.resourceManager.getResourceTypes()){
+        if (ImGui::CollapsingHeader(resourceType.c_str(), ImGuiTreeNodeFlags_Framed)) {
+            for (const auto& resource : context.resourceManager.getAll<Resource>()) {
+                if(std::string(resource.get()->inspectorName()) == std::string(resourceType)){
+                    if (ImGui::Selectable(resource->id().c_str(), m_selectedInspectable == resource.get())) {
+                        m_selectedInspectable = resource.get();
+                    }
+                }
+            }
+        }
+    }
+    ImGui::End();
+}
+
+void Editor::drawInspector(ApplicationContext& context){
+    ImGui::Begin("Inspector", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
+    if (m_selectedInspectable) {
+
+        // Scene Object Inspector
+        if(dynamic_cast<SceneObject*>(m_selectedInspectable)){
+            EditorUtils::DrawHeader("Scene Object");
+            m_selectedInspectable->drawInspector(context);
+        
+        // Resource Inspector
+        } else {
+            EditorUtils::DrawHeader("Resource");
+            EditorUtils::DrawInspectableName(m_selectedInspectable->inspectorName());
+            ImGui::Separator();
+            m_selectedInspectable->drawInspector(context);
+        }
+    }
+    ImGui::End();
+}
+
+
+void Editor::endFrame(){
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+
+void Editor::setupDockspace(){
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+
+    ImGuiWindowFlags hostFlags =
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+        ImGuiWindowFlags_NoBackground;
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::Begin("DockHost", nullptr, hostFlags);
+    ImGui::PopStyleVar(3);
+
+    ImGuiID dockspaceId = ImGui::GetID("MainDockspace");
+    ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+    static bool builtLayout = false;
+    if (!builtLayout) {
+        builtLayout = true;
+
+        ImGui::DockBuilderRemoveNode(dockspaceId);
+        ImGui::DockBuilderAddNode(dockspaceId, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
+
+        ImGuiID rightId;
+        ImGuiID leftId;
+        ImGuiID leftBottomId;
+        
+        ImGui::DockBuilderSplitNode(dockspaceId, ImGuiDir_Left, 0.20f, &leftId, &dockspaceId);
+        ImGui::DockBuilderSplitNode(dockspaceId, ImGuiDir_Right, 0.25f, &rightId, &dockspaceId);
+        ImGui::DockBuilderSplitNode(leftId, ImGuiDir_Down, 0.20f, &leftBottomId, &leftId);
+
+        ImGui::DockBuilderDockWindow("Hierarchy", leftId);
+        ImGui::DockBuilderDockWindow("Resources", leftBottomId);
+        ImGui::DockBuilderDockWindow("Viewport", dockspaceId);
+        ImGui::DockBuilderDockWindow("Inspector", rightId);
+
+        ImGui::DockBuilderFinish(dockspaceId);
+    }
+
+    ImGui::End();
+}
+
+
+SceneObject* Editor::getSelectedSceneObject() const{
+    if(m_selectedInspectable){
+        if(auto retVal = dynamic_cast<SceneObject*>(m_selectedInspectable))
+            return retVal;
+    }
+
+    return nullptr;
+}
+
+void Editor::clearSelectedSceneObject(){
+    m_selectedInspectable = nullptr;
+}

@@ -1,0 +1,116 @@
+
+#include "renderer/Renderer.hpp"
+#include "scene/Scene.hpp"
+#include "scene/SceneObject.hpp"
+#include "components/MeshRenderer.hpp"
+#include "core/Constants.hpp"
+#include "core/ApplicationContext.hpp"
+#include "editor/EditorCamera.hpp"
+
+#include "resources/ResourceManager.hpp"
+#include "resources/Mesh.hpp"
+#include "resources/Material.hpp"
+#include "resources/Shader.hpp"
+
+#include <glad/glad.h>
+
+void Renderer::initialize(const ApplicationContext& context){
+	m_overlayShader = context.resourceManager.get<Shader>("builtin:unlit");
+}
+
+
+void Renderer::Render(const Scene& scene, const ApplicationContext& context, int width, int height, std::vector<OverlayItem> overlayItems) {
+
+	m_framebuffer.resize(width, height);
+	m_framebuffer.bind();
+
+
+	glFrontFace(GL_CCW); // Ensure counter clockwise front faces
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.10f, 0.10f, 0.15f, 1.0f);	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	auto& camera = context.camera;
+	float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+	glm::mat4 viewProjectionMatrix = camera.projectionMatrix(aspectRatio) * camera.viewMatrix();
+
+	// Traverse scene and render each object with a MeshRenderer component
+	for (auto& obj : scene.objects()) {
+		if (auto meshRenderer = obj.get()->getComponent<MeshRenderer>()) {
+			if(!meshRenderer->mesh || !meshRenderer->material) {
+				// w/o material I could still render the mesh with a default material, but for now I will just skip it
+				continue;
+			}
+
+			auto shader = meshRenderer->material->getShader();
+			shader->use();
+			auto modelMatrix = obj.get()->transform->localMatrix();
+
+			if(shader->hasUniform("engine_normal_mat"))
+				shader->setMat3("engine_normal_mat", glm::transpose(glm::inverse(glm::mat3(modelMatrix))));
+			if(shader->hasUniform("engine_mvp_mat"))
+				shader->setMat4("engine_mvp_mat", viewProjectionMatrix * modelMatrix);
+			applyMaterialProperties(meshRenderer->material); // Use shader and set material properties into uniforms
+			
+			switch (meshRenderer->material->faceCulling)
+			{
+			case FaceCulling::NONE:
+				glDisable(GL_CULL_FACE);
+				break;		
+			case FaceCulling::BACK:
+				glEnable(GL_CULL_FACE);
+				glCullFace(GL_BACK);  
+				break;		
+			case FaceCulling::FRONT:
+				glEnable(GL_CULL_FACE);
+				glCullFace(GL_FRONT);  
+				break;		
+			default:
+				break;
+			}
+
+			glBindVertexArray(meshRenderer->mesh->vao());
+			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(meshRenderer->mesh->indicesCount()), GL_UNSIGNED_INT, nullptr);
+		}
+	}
+
+	// Render grid
+
+	// Render overlay
+	glClear(GL_DEPTH_BUFFER_BIT);
+	for(auto& overlayItem : overlayItems){
+		m_overlayShader->use();
+
+		auto modelMatrix = overlayItem.modelMatrix;
+		if(m_overlayShader->hasUniform("engine_mvp_mat"))
+			m_overlayShader->setMat4("engine_mvp_mat", viewProjectionMatrix * modelMatrix);
+		if(m_overlayShader->hasUniform("color"))
+			m_overlayShader->setVec3("color", overlayItem.color);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+
+		glBindVertexArray(overlayItem.mesh->vao());
+		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(overlayItem.mesh->indicesCount()), GL_UNSIGNED_INT, nullptr);
+	}
+
+	m_framebuffer.unbind();
+}
+
+void Renderer::applyMaterialProperties(const std::shared_ptr<Material>& material) const {
+		
+	for(auto properties : material->properties()) {
+		const std::string& propertyName = properties.first;
+		const MaterialPropertyValue& value = properties.second;
+
+		if(std::holds_alternative<float>(value)) {
+			material->getShader()->setFloat(propertyName, std::get<float>(value));
+		} else if (std::holds_alternative<glm::vec2>(value)) {
+			material->getShader()->setVec2(propertyName, std::get<glm::vec2>(value));
+		} else if (std::holds_alternative<glm::vec3>(value)) {
+			material->getShader()->setVec3(propertyName, std::get<glm::vec3>(value));
+		} else if (std::holds_alternative<glm::vec4>(value)) {
+			material->getShader()->setVec4(propertyName, std::get<glm::vec4>(value));
+		}
+	}
+}

@@ -1,22 +1,95 @@
 
 # Level Design Engine Tool
 
+### Roadmap
+-- MVP --
+- Gizmos rendering + controls
+	- (free) Viewport object selection
+- Serialization -> resources
+	- Resources creation
+	- importer or exporter: obj, gltf, '.ldscn'
+- Transform Hierarchy
+	- Account for delete children, duplicate in place
 
+-- Nice to Have --
+- Rendering: shadows, textures
+- Mass select -> duplicate/delete
+- Material instances: 
+	- material resource serves as a template
+	- each object can override the default values
+- Scene Cameras: override editor camera rendering and controls
+- Performance: frustum culling
+- Resources: advanced view on inspector (render mesh/material)
+
+-- Future Work --
+- Mesh Editor!
+- Procedural mesh generation
+
+### Done
+
+	
 ### TODO
 
-- Renderer
-	- First triangle
-	- Camera fixed
-	- Camera pan
-- SceneObjects Hierarchy
+- Gizmos Controls
 
+- meshFactory: circle
+- meshFactory: pyramid { return cylinder(smoothShading = false);} !! start offset: -90 on evenSided, -45 oddSided
+- meshFactory.cylinder: renderCaps=true/false; smoothShading:true/false (duplicates every vertex)
+- meshFactory: sphere
 
-### Main Loop
+- Gizmos
+		- grid snapping
+- Scene grid rendering
+	- grid granularity? --> based on zoom?
 
-- Render Screen
-	- Paint current selected view
-- Read Input 
-	- Execute actions based on context (current active view, registered actions...)
+- Editor utilities
+	- Camera align with axis (+-x,y,z)
+	- Lock scale: every axis scales uniformly
+	- shared material/material instance --> resource instance? 
+		- resources could serve as templates, which then provide logic to track changes?
+	- create new resources --> popup with constructor requirements (id, ...)
+		- material
+		- mesh (not for now --> mesh editor)
+	- Allow multiple selection in Hierarchy?
+		- _this_is_a_*tedious*_implementation_
+		- mass clone/delete
+		- gizmos: calculate center transform, apply transformation to every object based on local/global setting
+		- display common components in hierarchy?
+	- Merge Meshes? a parent gets a mesh resulting from the fusion of every child's mesh (how to bridge faces/edges?)
+
+- Import .glb meshes
+
+- Scene Hierarchy:
+	- TransformChild calculation (& caching?)
+
+- Camera SceneObject
+	- Camera settings: perspective mode, fov, pitch/yaw?...
+	- Select to drive as main editor camera, then switch back (viewport button if EditorCamera.isOverriden)
+
+- Serialization of Resources:
+	- Mesh, material, 
+	- Scene
+		- Get object (by name/id)
+		- Json serialization (define format) --> Should be handled by resource load/unload
+		- Appliaction Loading scene
+	- Resource Manager
+		- Unload resources that are not being used
+
+- Performance: Frustum + backface culling
+
+- Resources inspectors:
+	- Camera: preview
+	- Mesh: render in small view with default plain shader
+	- Material: render in quad
+
+- Rendering:
+	- Lights SceneObjects (point, directional)
+		- Shadows
+	- Textures
+
+- mesh editing? extrude faces, add edges...
+- procedural mesh generation!!
+	- grow from base mesh?
 
 ### Systems
 - Renderer
@@ -98,4 +171,82 @@
 - Save edited mesh as prefab
 - Subdivide Edge
 
+
+
+
+
+
+# Data Classes
+
+- Scene
+	- SceneObject[]
+
+- SceneObject
+	- Transform
+	- Component[]
+	
+- Component: Abstract
+	- Paint UI logic
+	- Hold pertinent data
+
+- Transform: Component
+	- Position, rotation (quat), scale
+
+- MeshRenderer: Component
+	- Mesh
+	- Material (if empty use default rendering program 'triangle.vert/frag')
+
+- Resource: Abstract
+	- Save/load logic
+
+- Mesh: Resource
+	- Vertex/Indices/UV Arrays
+	- VOA, VAB...
+
+- Material: Resource (really basic for now, no PBR)
+	- Shader
+	- Albedo
+	- Emission?
+	
+- Shader: Resource
+	
+	
+- Camera: Component
+	- FOV
+	- Near/Far planes
+	- Projection: iso/perspective
+	- (TODO: provide preview in small window)
+	- Set as main method
+	
+- Application:
+	- Globals
+	- Scene
+	- Renderer
+	- GUI/GL setup
+	- Main loop
+	
+- ResourceManager
+	- handles shared resources
+- Renderer
+	- Main Camera: near/far, fov., transform...
+	- Walks the scene tree and uses every meshRenderer component
+	
+	
+# Folder Structure
+
+/root
+	/assets        user data (scenes, custom resources)
+	/src/
+		/core        					Application, utils
+		/scene       					Scene, SceneObject, Component, Transform
+		/components  			MeshRenderer, Camera
+		/resources   				Resource, ResourceManager, Mesh, Material, Shader
+		/renderer    				Renderer
+		/editor      					panels, editor camera, selection...
+	/builtin_resources/     built-in data
+		/meshes
+			(e.g. cube, quad, sphere, 
+		/materials
+			/shaders
+	
 
